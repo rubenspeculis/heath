@@ -106,16 +106,16 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow className="border-slate-200/50 hover:bg-slate-50/50">
-            <TableHead className="font-semibold text-slate-700">Stock</TableHead>
-            <TableHead className="font-semibold text-slate-700">Status</TableHead>
-            <TableHead className="font-semibold text-slate-700">Price</TableHead>
-            <TableHead className="font-semibold text-slate-700">Exchange</TableHead>
-            <TableHead className="font-semibold text-slate-700">Quantity</TableHead>
-            <TableHead className="font-semibold text-slate-700">Avg Cost</TableHead>
-            <TableHead className="font-semibold text-slate-700">Market Value</TableHead>
-            <TableHead className="font-semibold text-slate-700">Gain/Loss</TableHead>
-            <TableHead className="font-semibold text-slate-700">Sector</TableHead>
+          <TableRow className="border-white/10 hover:bg-white/5">
+            <TableHead className="font-bold text-white/90">Stock</TableHead>
+            <TableHead className="font-bold text-white/90">Status</TableHead>
+            <TableHead className="font-bold text-white/90">Price</TableHead>
+            <TableHead className="font-bold text-white/90">Exchange</TableHead>
+            <TableHead className="font-bold text-white/90">Quantity</TableHead>
+            <TableHead className="font-bold text-white/90">Avg Cost</TableHead>
+            <TableHead className="font-bold text-white/90">Market Value</TableHead>
+            <TableHead className="font-bold text-white/90">Gain/Loss</TableHead>
+            <TableHead className="font-bold text-white/90">Sector</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -128,11 +128,11 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
               item.quantity * item.stock.price : null
 
             return (
-              <TableRow key={item.id} className="hover:bg-slate-50/50 border-slate-200/30 transition-colors duration-150">
+              <TableRow key={item.id} className="hover:bg-white/5 border-white/10 transition-colors duration-300 group">
                 <TableCell>
                   <div>
-                    <div className="font-semibold text-slate-900">{item.stock.ticker}</div>
-                    <div className="text-sm text-slate-600 truncate max-w-[200px]">
+                    <div className="font-bold text-white group-hover:text-blue-200 transition-colors">{item.stock.ticker}</div>
+                    <div className="text-sm text-white/60 truncate max-w-[200px] group-hover:text-white/80 transition-colors">
                       {item.stock.name}
                     </div>
                   </div>
@@ -241,10 +241,10 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
         </TableBody>
       </Table>
       
-      {/* Premium Pagination Controls */}
+      {/* Sexy Dark Pagination Controls */}
       {data.length > itemsPerPage && (
-        <div className="flex items-center justify-between mt-6 px-6 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-t border-slate-200/50 rounded-b-2xl">
-          <div className="text-sm text-slate-600 font-medium">
+        <div className="flex items-center justify-between mt-6 px-6 py-4 bg-gradient-to-r from-black/40 to-slate-900/40 border-t border-white/10 rounded-b-3xl backdrop-blur-sm">
+          <div className="text-sm text-white/80 font-semibold">
             Showing {Math.min((currentPage - 1) * itemsPerPage + 1, data.length)} to{' '}
             {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} stocks
           </div>
@@ -254,7 +254,7 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
               size="sm"
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 bg-white/80 border-slate-200 hover:bg-white shadow-sm"
+              className="flex items-center gap-1 bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-sm backdrop-blur-sm"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -271,7 +271,7 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
                 .map((page, index, array) => (
                   <div key={page} className="flex items-center">
                     {index > 0 && array[index - 1] !== page - 1 && (
-                      <span className="px-2 text-slate-400">...</span>
+                      <span className="px-2 text-white/40">...</span>
                     )}
                     <Button
                       variant={currentPage === page ? "default" : "outline"}
@@ -279,8 +279,8 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
                       onClick={() => setCurrentPage(page)}
                       className={`w-8 h-8 p-0 ${
                         currentPage === page 
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
-                          : 'bg-white/80 border-slate-200 hover:bg-white shadow-sm'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                          : 'bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-sm'
                       }`}
                     >
                       {page}
@@ -295,7 +295,7 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
                 Math.min(prev + 1, Math.ceil(data.length / itemsPerPage))
               )}
               disabled={currentPage === Math.ceil(data.length / itemsPerPage)}
-              className="flex items-center gap-1 bg-white/80 border-slate-200 hover:bg-white shadow-sm"
+              className="flex items-center gap-1 bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-sm backdrop-blur-sm"
             >
               Next
               <ChevronRight className="h-4 w-4" />

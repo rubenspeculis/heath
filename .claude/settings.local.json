@@ -15,7 +15,9 @@
       "Bash(npx prisma studio:*)",
       "Bash(node:*)",
       "WebFetch(domain:site.financialmodelingprep.com)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
