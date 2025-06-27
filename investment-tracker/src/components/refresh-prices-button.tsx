@@ -1,7 +1,6 @@
-'use client'
 
 import { useState } from 'react'
-import { RefreshCw, CheckCircle, AlertCircle } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { trpc } from '@/lib/trpc-client-new'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -26,7 +25,7 @@ export function RefreshPricesButton() {
         duration: 3000,
       })
     },
-    onError: (error) => {
+    onError: () => {
       setIsRefreshing(false)
       toast({
         title: "Refresh Failed",

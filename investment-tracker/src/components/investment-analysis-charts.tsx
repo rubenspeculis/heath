@@ -1,4 +1,3 @@
-'use client'
 
 import { useState, useEffect } from 'react'
 import { 
@@ -10,17 +9,7 @@ import {
   Tooltip, 
   ResponsiveContainer,
   BarChart,
-  Bar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  LineChart,
-  Line,
-  ComposedChart,
-  Area,
-  AreaChart
+  Bar
 } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -57,8 +46,23 @@ interface InvestmentAnalysisChartsProps {
   }>
 }
 
+interface AnalysisStock {
+  ticker: string
+  name: string
+  sector?: string | null
+  price?: number | null
+  marketCap?: number | null
+  status: string
+  peRatio?: number | null
+  hasFinancialData: boolean
+  growthScore: number
+  qualityScore: number
+  overallScore: number
+  metrics: Record<string, number | undefined>
+}
+
 export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps) {
-  const [analysisData, setAnalysisData] = useState<any[]>([])
+  const [analysisData, setAnalysisData] = useState<AnalysisStock[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
 
@@ -136,13 +140,13 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
     acc[sector].count++
     
     return acc
-  }, {} as Record<string, any>)
+  }, {} as Record<string, { sector: string; count: number; stocks: AnalysisStock[]; avgGrowthScore?: number; avgQualityScore?: number; avgOverallScore?: number }>)
 
   // Calculate sector averages
-  Object.values(sectorAnalysis).forEach((sector: any) => {
-    sector.avgGrowthScore = sector.stocks.reduce((sum: number, s: any) => sum + s.growthScore, 0) / sector.count
-    sector.avgQualityScore = sector.stocks.reduce((sum: number, s: any) => sum + s.qualityScore, 0) / sector.count
-    sector.avgOverallScore = sector.stocks.reduce((sum: number, s: any) => sum + s.overallScore, 0) / sector.count
+  Object.values(sectorAnalysis).forEach((sector) => {
+    sector.avgGrowthScore = sector.stocks.reduce((sum: number, s: AnalysisStock) => sum + s.growthScore, 0) / sector.count
+    sector.avgQualityScore = sector.stocks.reduce((sum: number, s: AnalysisStock) => sum + s.qualityScore, 0) / sector.count
+    sector.avgOverallScore = sector.stocks.reduce((sum: number, s: AnalysisStock) => sum + s.overallScore, 0) / sector.count
   })
 
   const sectorData = Object.values(sectorAnalysis)
@@ -155,7 +159,7 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
       peRatio: stock.peRatio,
       growthScore: stock.growthScore * 100,
       overallScore: stock.overallScore,
-      risk: stock.peRatio > 30 ? 'High' : stock.peRatio > 15 ? 'Medium' : 'Low'
+      risk: (stock.peRatio ?? 0) > 30 ? 'High' : (stock.peRatio ?? 0) > 15 ? 'Medium' : 'Low'
     }))
 
   const getScoreColor = (score: number) => {
@@ -170,7 +174,7 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
     return { label: 'Poor', variant: 'destructive' as const }
   }
 
-  const CustomScatterTooltip = ({ active, payload }: any) => {
+  const CustomScatterTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { ticker: string; name: string; sector?: string | null; x: number; y: number; overallScore: number; status: string } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
@@ -191,7 +195,6 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
   }
 
   // Check if we have any financial data
-  const stocksWithFinancialData = analysisData.filter(stock => stock.hasFinancialData)
   const stocksWithoutFinancialData = analysisData.filter(stock => !stock.hasFinancialData)
 
   if (analysisData.length === 0) {

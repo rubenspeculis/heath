@@ -1,9 +1,6 @@
-'use client'
 
-import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, BarChart3, Target, Filter, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
-import { trpc } from '@/lib/trpc-client-new'
-import { scoringEngine } from '@/lib/scoring'
+import { useState } from 'react'
+import { TrendingUp, BarChart3, Target, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -42,15 +39,14 @@ interface WatchlistAnalysisProps {
 export function WatchlistAnalysis({ data }: WatchlistAnalysisProps) {
   const [sortBy, setSortBy] = useState<'ticker' | 'sector' | 'price' | 'marketCap'>('ticker')
   const [filterSector, setFilterSector] = useState<string>('all')
-  const [analysisData, setAnalysisData] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8
 
   // Get unique sectors for filtering
-  const sectors = Array.from(new Set(data.map(item => item.stock.sector).filter(Boolean)))
+  const sectors = Array.from(new Set(data.map(item => item.stock.sector).filter((sector): sector is string => Boolean(sector))))
 
   // Reset to page 1 when filters change
-  const handleSortChange = (newSortBy: any) => {
+  const handleSortChange = (newSortBy: 'ticker' | 'sector' | 'price' | 'marketCap') => {
     setSortBy(newSortBy)
     setCurrentPage(1)
   }
@@ -281,7 +277,7 @@ export function WatchlistAnalysis({ data }: WatchlistAnalysisProps) {
         <CardHeader className="relative">
           <CardTitle className="text-white">Watchlist Stocks</CardTitle>
           <CardDescription className="text-white/70">
-            Detailed analysis of stocks you're monitoring
+            Detailed analysis of stocks you&apos;re monitoring
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 relative">

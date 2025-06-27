@@ -1,6 +1,5 @@
-'use client'
 
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface PortfolioChartsProps {
@@ -76,7 +75,7 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0']
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; payload: { percentage?: number } }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/20 rounded-lg shadow-2xl">
@@ -208,8 +207,7 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
                   contentStyle={{ backgroundColor: '#00000090', border: '1px solid #ffffff20', borderRadius: '8px', color: '#ffffff' }}
                 />
                 <Bar 
-                  dataKey="gainLoss" 
-                  fill={(entry: any) => entry.gainLoss >= 0 ? '#10B981' : '#EF4444'}
+                  dataKey="gainLoss"
                 >
                   {performanceData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.gainLoss >= 0 ? '#10B981' : '#EF4444'} />

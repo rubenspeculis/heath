@@ -14,7 +14,7 @@ import {
   MarketHours,
   AvailableSymbol,
 } from '../types/company.js';
-import { DateString, BaseSearchParams } from '../types/api.js';
+import { DateString } from '../types/api.js';
 
 export class CompanyService {
   constructor(private httpClient: BaseHttpClient) {}

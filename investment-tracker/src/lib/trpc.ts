@@ -1,7 +1,7 @@
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
 import { db } from './db'
-import { financialApi } from './financial-api'
+import { fmpFinancialApi } from './fmp-financial-api'
 
 const t = initTRPC.create()
 
@@ -186,7 +186,7 @@ export const appRouter = router({
       ticker: z.string(),
     }))
     .mutation(async ({ input }) => {
-      const quote = await financialApi.getStockQuote(input.ticker)
+      const quote = await fmpFinancialApi.getStockQuote(input.ticker)
       if (quote) {
         return await db.stock.update({
           where: { id: input.stockId },
@@ -206,7 +206,7 @@ export const appRouter = router({
       ticker: z.string(),
     }))
     .mutation(async ({ input }) => {
-      const profile = await financialApi.getCompanyProfile(input.ticker)
+      const profile = await fmpFinancialApi.getCompanyProfile(input.ticker)
       if (profile) {
         return await db.stock.update({
           where: { id: input.stockId },
@@ -245,7 +245,7 @@ export const appRouter = router({
       for (const stock of watchlistStocks) {
         try {
           console.log(`Fetching quote for ${stock.ticker}...`)
-          const quote = await financialApi.getStockQuote(stock.ticker)
+          const quote = await fmpFinancialApi.getStockQuote(stock.ticker)
           console.log(`Quote for ${stock.ticker}:`, quote)
           
           if (quote) {

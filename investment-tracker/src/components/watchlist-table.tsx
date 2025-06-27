@@ -1,4 +1,3 @@
-'use client'
 
 import { useState } from 'react'
 import { MoreHorizontal, Edit, Trash2, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react'

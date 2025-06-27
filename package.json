@@ -11,7 +11,14 @@
     "dev": "npm run dev --workspace=investment-tracker",
     "build": "npm run build --workspaces --if-present",
     "test": "npm test --workspaces --if-present",
+    "test:run": "npm run test:run --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present", 
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspace=investment-tracker",
+    "test:e2e:ui": "npm run test:e2e:ui --workspace=investment-tracker",
+    "test:install": "npm run test:install --workspace=investment-tracker",
     "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "install-all": "npm install",
@@ -21,7 +28,9 @@
     "dev:api": "npm run dev --workspace=fmp-api-client",
     "build:api": "npm run build --workspace=fmp-api-client",
     "db:setup": "npm run db:generate --workspace=investment-tracker && npm run db:push --workspace=investment-tracker",
-    "db:seed": "npm run db:seed --workspace=investment-tracker"
+    "db:seed": "npm run db:seed --workspace=investment-tracker",
+    "check:all": "npm run typecheck && npm run lint && npm run test:run && npm run build",
+    "ci": "npm run install-all && npm run check:all"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

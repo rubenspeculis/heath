@@ -1,4 +1,3 @@
-'use client'
 
 import { useState } from 'react'
 import { Plus, TrendingUp, TrendingDown, DollarSign, BarChart3, Download, Home, PieChart, LineChart, List } from 'lucide-react'
@@ -24,7 +23,7 @@ export function Dashboard() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   
   const { data: watchlist, isLoading: watchlistLoading } = trpc.getWatchlist.useQuery()
-  const { data: stocks, isLoading: stocksLoading } = trpc.getStocks.useQuery()
+  const { data: stocks } = trpc.getStocks.useQuery()
 
   const ownedStocks = watchlist?.filter(item => item.status === 'OWNED') || []
   const watchingStocks = watchlist?.filter(item => item.status === 'WATCHING') || []

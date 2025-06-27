@@ -1,9 +1,7 @@
-'use client'
-
 import { createTRPCReact } from '@trpc/react-query'
 import { httpBatchLink } from '@trpc/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, type ReactNode, createElement } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { AppRouter } from './trpc'
 
 export const trpc = createTRPCReact<AppRouter>()
@@ -12,7 +10,7 @@ interface TRPCProviderProps {
   children: ReactNode
 }
 
-export function TRPCProvider(props: TRPCProviderProps) {
+export function TRPCProvider({ children }: TRPCProviderProps) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -25,21 +23,20 @@ export function TRPCProvider(props: TRPCProviderProps) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: '/api/trpc',
+          url: 'http://localhost:3001/api/trpc',
         }),
       ],
     })
   )
 
-  const TRPCProviderComponent = trpc.Provider
+  // Simple JSX approach instead of createElement
+  const TRPCProviderComponent = trpc.Provider as any
   
-  return createElement(
-    TRPCProviderComponent,
-    { client: trpcClient, queryClient: queryClient },
-    createElement(
-      QueryClientProvider,
-      { client: queryClient },
-      props.children
-    )
+  return (
+    <TRPCProviderComponent client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </TRPCProviderComponent>
   )
 }
