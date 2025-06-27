@@ -299,3 +299,6 @@ export interface OptionsChain {
   impliedVolatility: NumericValue;
   inTheMoney: boolean;
 }
+
+// Re-export HistoricalPeriod for convenience
+export type { HistoricalPeriod };

@@ -7,9 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "get-secrets": "sops -d env.enc.yaml > .env"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next out dist",
+    "get-secrets": "sops -d env.enc.yaml > .env",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@heath/fmp-api-client": "file:../fmp-api-client",
     "@prisma/client": "^6.10.1",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",

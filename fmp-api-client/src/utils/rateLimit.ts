@@ -120,7 +120,7 @@ export class RateLimiter {
     }
 
     const oldestRequest = this.state.requests[0];
-    const timeUntilOldestExpires = oldestRequest.timestamp + 60 * 1000 - Date.now();
+    const timeUntilOldestExpires = oldestRequest ? oldestRequest.timestamp + 60 * 1000 - Date.now() : 0;
     return Math.max(0, timeUntilOldestExpires);
   }
 

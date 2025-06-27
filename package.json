@@ -1,0 +1,48 @@
+{
+  "name": "heath-monorepo",
+  "version": "1.0.0",
+  "description": "Investment tracking and financial API client monorepo",
+  "private": true,
+  "workspaces": [
+    "investment-tracker",
+    "fmp-api-client"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=investment-tracker",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "install-all": "npm install",
+    "get-secrets": "npm run get-secrets --workspace=investment-tracker && npm run get-secrets --workspace=fmp-api-client",
+    "dev:tracker": "npm run dev --workspace=investment-tracker",
+    "build:tracker": "npm run build --workspace=investment-tracker",
+    "dev:api": "npm run dev --workspace=fmp-api-client",
+    "build:api": "npm run build --workspace=fmp-api-client",
+    "db:setup": "npm run db:generate --workspace=investment-tracker && npm run db:push --workspace=investment-tracker",
+    "db:seed": "npm run db:seed --workspace=investment-tracker"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/heath.git"
+  },
+  "keywords": [
+    "investment",
+    "financial",
+    "api",
+    "tracker",
+    "portfolio",
+    "monorepo"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

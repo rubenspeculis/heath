@@ -79,12 +79,12 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border rounded shadow-lg">
-          <p className="font-medium">{label}</p>
-          <p className="text-blue-600">
+        <div className="bg-black/90 backdrop-blur-xl p-3 border border-white/20 rounded-lg shadow-2xl">
+          <p className="font-medium text-white">{label}</p>
+          <p className="text-emerald-400">
             Value: ${payload[0].value.toLocaleString()}
           </p>
-          <p className="text-gray-600">
+          <p className="text-white/70">
             {payload[0].payload.percentage?.toFixed(1)}% of portfolio
           </p>
         </div>
@@ -96,23 +96,25 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
   if (ownedStocks.length === 0) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Portfolio Allocation</CardTitle>
-            <CardDescription>Distribution of your investment portfolio</CardDescription>
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-600/5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-emerald-200">Portfolio Allocation</CardTitle>
+            <CardDescription className="text-emerald-200/70">Distribution of your investment portfolio</CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center justify-center h-64">
-            <p className="text-gray-500">No owned positions to display</p>
+          <CardContent className="relative flex items-center justify-center h-64">
+            <p className="text-white/60">No owned positions to display</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Sector Allocation</CardTitle>
-            <CardDescription>Portfolio diversification by sector</CardDescription>
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl shadow-blue-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-blue-200">Sector Allocation</CardTitle>
+            <CardDescription className="text-blue-200/70">Portfolio diversification by sector</CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center justify-center h-64">
-            <p className="text-gray-500">No sector data available</p>
+          <CardContent className="relative flex items-center justify-center h-64">
+            <p className="text-white/60">No sector data available</p>
           </CardContent>
         </Card>
       </div>
@@ -123,12 +125,13 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Portfolio Allocation */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Portfolio Allocation</CardTitle>
-            <CardDescription>Distribution by market value</CardDescription>
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-600/5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-emerald-200">Portfolio Allocation</CardTitle>
+            <CardDescription className="text-emerald-200/70">Distribution by market value</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -152,12 +155,13 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
         </Card>
 
         {/* Sector Allocation */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sector Allocation</CardTitle>
-            <CardDescription>Portfolio diversification by sector</CardDescription>
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl shadow-blue-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-blue-200">Sector Allocation</CardTitle>
+            <CardDescription className="text-blue-200/70">Portfolio diversification by sector</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -183,23 +187,25 @@ export function PortfolioCharts({ data }: PortfolioChartsProps) {
 
       {/* Performance Chart */}
       {performanceData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Position Performance</CardTitle>
-            <CardDescription>Gain/Loss for your largest positions</CardDescription>
+        <Card className="bg-black/30 backdrop-blur-2xl border-white/10 shadow-2xl shadow-purple-500/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-violet-600/5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-purple-200">Position Performance</CardTitle>
+            <CardDescription className="text-purple-200/70">Gain/Loss for your largest positions</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={performanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                <XAxis dataKey="name" tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
+                <YAxis tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
                 <Tooltip 
                   formatter={(value: number) => [
                     `$${value.toLocaleString()}`,
                     'Gain/Loss'
                   ]}
                   labelFormatter={(label) => `Stock: ${label}`}
+                  contentStyle={{ backgroundColor: '#00000090', border: '1px solid #ffffff20', borderRadius: '8px', color: '#ffffff' }}
                 />
                 <Bar 
                   dataKey="gainLoss" 

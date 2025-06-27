@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 import { ResolvedFMPClientConfig } from './config.js';
 import { RateLimiter, sleep, calculateBackoff } from '../utils/rateLimit.js';
 import {
@@ -146,6 +146,31 @@ export class BaseHttpClient {
    */
   resetRateLimit(): void {
     this.rateLimiter.reset();
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfig(): ResolvedFMPClientConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Update configuration (partial update)
+   */
+  updateConfig(newConfig: Partial<ResolvedFMPClientConfig>): void {
+    Object.assign(this.config, newConfig);
+    
+    // Update axios instance if needed
+    if (newConfig.baseUrl) {
+      this.axios.defaults.baseURL = newConfig.baseUrl;
+    }
+    if (newConfig.timeout) {
+      this.axios.defaults.timeout = newConfig.timeout;
+    }
+    if (newConfig.headers) {
+      Object.assign(this.axios.defaults.headers, newConfig.headers);
+    }
   }
 
   /**
