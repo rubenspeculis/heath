@@ -11,14 +11,7 @@ export function RefreshPricesButton() {
   const utils = trpc.useUtils()
 
   const refreshAllPrices = trpc.refreshAllWatchlistPrices.useMutation({
-    onMutate: () => {
-      setIsRefreshing(true)
-    },
     onSuccess: (results) => {
-      utils.getWatchlist.invalidate()
-      utils.getStocks.invalidate()
-      setIsRefreshing(false)
-      
       toast({
         title: "Prices Updated",
         description: `Successfully refreshed prices for ${results.length} stocks`,
@@ -26,9 +19,8 @@ export function RefreshPricesButton() {
       })
     },
     onError: () => {
-      setIsRefreshing(false)
       toast({
-        title: "Refresh Failed",
+        title: "Price Refresh Failed",
         description: "Unable to refresh prices. Check your API keys.",
         variant: "destructive",
         duration: 5000,
@@ -36,8 +28,39 @@ export function RefreshPricesButton() {
     },
   })
 
-  const handleRefresh = () => {
-    refreshAllPrices.mutate()
+  const refreshFinancialData = trpc.refreshAllFinancialData.useMutation({
+    onSuccess: (results) => {
+      utils.getWatchlist.invalidate()
+      utils.getStocks.invalidate()
+      setIsRefreshing(false)
+      
+      toast({
+        title: "All Data Updated",
+        description: `Successfully refreshed prices and financial data for ${results.length} stocks`,
+        duration: 3000,
+      })
+    },
+    onError: () => {
+      setIsRefreshing(false)
+      toast({
+        title: "Refresh Failed",
+        description: "Unable to refresh financial data. Check your API keys.",
+        variant: "destructive",
+        duration: 5000,
+      })
+    },
+  })
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      // First refresh prices (fast)
+      await refreshAllPrices.mutateAsync()
+      // Then refresh financial data (slower)
+      await refreshFinancialData.mutateAsync()
+    } catch (error) {
+      setIsRefreshing(false)
+    }
   }
 
   return (
@@ -48,7 +71,7 @@ export function RefreshPricesButton() {
       className="flex items-center gap-2"
     >
       <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-      {isRefreshing ? 'Refreshing...' : 'Refresh Prices'}
+      {isRefreshing ? 'Refreshing All Data...' : 'Refresh All Data'}
     </Button>
   )
 }

@@ -35,7 +35,7 @@ export class CompanyService {
     if (options.exchange) params.exchange = options.exchange;
 
     const response = await this.httpClient.get<CompanySearchResult[]>('/search', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -52,7 +52,7 @@ export class CompanyService {
   async getProfiles(symbols: string[]): Promise<CompanyProfile[]> {
     const symbolList = symbols.join(',');
     const response = await this.httpClient.get<CompanyProfile[]>(`/profile/${symbolList}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -60,7 +60,7 @@ export class CompanyService {
    */
   async getKeyExecutives(symbol: string): Promise<CompanyExecutive[]> {
     const response = await this.httpClient.get<CompanyExecutive[]>(`/key-executives/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -92,7 +92,7 @@ export class CompanyService {
       `/historical-market-capitalization/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -108,7 +108,7 @@ export class CompanyService {
    */
   async getRating(symbol: string): Promise<CompanyRating[]> {
     const response = await this.httpClient.get<CompanyRating[]>(`/rating/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -127,7 +127,7 @@ export class CompanyService {
       `/historical-rating/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -143,7 +143,7 @@ export class CompanyService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get<InsiderTrade[]>(`/insider-trading/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -151,7 +151,7 @@ export class CompanyService {
    */
   async getStockSplits(symbol: string): Promise<StockSplit[]> {
     const response = await this.httpClient.get<StockSplit[]>(`/stock_split/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -159,7 +159,7 @@ export class CompanyService {
    */
   async getDividendHistory(symbol: string): Promise<StockDividend[]> {
     const response = await this.httpClient.get<StockDividend[]>(`/historical-price-full/stock_dividend/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -180,7 +180,7 @@ export class CompanyService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get<StockNews[]>(`/stock_news/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -195,7 +195,7 @@ export class CompanyService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get<StockNews[]>('/stock_news', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -211,7 +211,7 @@ export class CompanyService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get<StockNews[]>(`/press-releases/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -220,7 +220,7 @@ export class CompanyService {
   async getMarketHours(exchange?: string): Promise<MarketHours[]> {
     const params = exchange ? { exchange } : {};
     const response = await this.httpClient.get<MarketHours[]>('/market-hours', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -228,7 +228,7 @@ export class CompanyService {
    */
   async getAvailableSymbols(): Promise<AvailableSymbol[]> {
     const response = await this.httpClient.get<AvailableSymbol[]>('/available-traded/list');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -236,7 +236,7 @@ export class CompanyService {
    */
   async getSymbolsByExchange(exchange: string): Promise<AvailableSymbol[]> {
     const response = await this.httpClient.get<AvailableSymbol[]>(`/symbol/${exchange}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -262,7 +262,7 @@ export class CompanyService {
     if (options.page) params.page = options.page;
 
     const response = await this.httpClient.get<CompanyProfile[]>('/delisted-companies', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -270,7 +270,7 @@ export class CompanyService {
    */
   async getCompaniesBySector(sector: string): Promise<CompanyProfile[]> {
     const response = await this.httpClient.get<CompanyProfile[]>(`/stock-screener?sector=${sector}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -278,7 +278,7 @@ export class CompanyService {
    */
   async getCompaniesByIndustry(industry: string): Promise<CompanyProfile[]> {
     const response = await this.httpClient.get<CompanyProfile[]>(`/stock-screener?industry=${industry}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -286,7 +286,7 @@ export class CompanyService {
    */
   async getCompaniesByCountry(country: string): Promise<CompanyProfile[]> {
     const response = await this.httpClient.get<CompanyProfile[]>(`/stock-screener?country=${country}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -294,7 +294,7 @@ export class CompanyService {
    */
   async getAnalystRecommendations(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/grade/${symbol}`);
-    return response.data;
+    return response.data as any[];
   }
 
   /**
@@ -313,7 +313,7 @@ export class CompanyService {
     if (options.quarter) params.quarter = options.quarter;
 
     const response = await this.httpClient.get(`/earning_call_transcript/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -332,7 +332,7 @@ export class CompanyService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get(`/sec_filings/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -340,7 +340,7 @@ export class CompanyService {
    */
   async getCoreInformation(symbol: string): Promise<any> {
     const response = await this.httpClient.get(`/core_information/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -348,6 +348,6 @@ export class CompanyService {
    */
   async getEmployeeCount(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/employee_count/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 }

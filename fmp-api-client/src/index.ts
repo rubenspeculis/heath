@@ -11,6 +11,7 @@
  */
 
 // Main client
+import { FMPApiClient } from './FMPApiClient.js';
 export { FMPApiClient } from './FMPApiClient.js';
 
 // Services

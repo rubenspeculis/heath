@@ -86,7 +86,21 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           shareDilution: latestFinancials?.shareDilution ?? undefined,
         }
 
+        // Debug logging for specific stocks
+        if (['ONON', 'TTD', 'APP', 'SNOW', 'PLTR'].includes(item.stock.ticker)) {
+          console.log(`🔍 Debug ${item.stock.ticker}:`, {
+            hasFinancialData: !!latestFinancials,
+            rawFinancials: latestFinancials,
+            processedMetrics: metrics
+          })
+        }
+
         const scores = scoringEngine.calculateOverallScore(metrics)
+        
+        // Debug logging for scores
+        if (['ONON', 'TTD', 'APP', 'SNOW', 'PLTR'].includes(item.stock.ticker)) {
+          console.log(`📊 Scores for ${item.stock.ticker}:`, scores)
+        }
         
         return {
           ticker: item.stock.ticker,
@@ -101,6 +115,12 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           metrics
         }
       })
+
+    console.log('🎯 Analysis Data (top 10):', stocksWithScores.slice(0, 10).map(s => ({
+      ticker: s.ticker,
+      overallScore: s.overallScore,
+      hasFinancialData: s.hasFinancialData
+    })))
 
     setAnalysisData(stocksWithScores)
   }, [data])
@@ -121,6 +141,13 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
   const topPerformers = [...analysisData]
     .sort((a, b) => b.overallScore - a.overallScore)
     .slice(0, 10)
+
+  // Debug the top performers data
+  console.log('🏆 Top Performers for chart:', topPerformers.map(p => ({
+    ticker: p.ticker,
+    overallScore: p.overallScore,
+    hasFinancialData: p.hasFinancialData
+  })))
 
   // Sector analysis
   const sectorAnalysis = analysisData.reduce((acc, stock) => {
@@ -326,6 +353,12 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           <CardContent className="relative">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topPerformers} layout="horizontal">
+                <defs>
+                  <linearGradient id="blueGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#3B82F6" />
+                    <stop offset="100%" stopColor="#6366F1" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                 <XAxis type="number" domain={[0, 1]} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
                 <YAxis dataKey="ticker" type="category" width={60} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
@@ -334,12 +367,6 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
                   contentStyle={{ backgroundColor: '#00000090', border: '1px solid #ffffff20', borderRadius: '8px', color: '#ffffff' }}
                 />
                 <Bar dataKey="overallScore" fill="url(#blueGradient)" />
-                <defs>
-                  <linearGradient id="blueGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#3B82F6" />
-                    <stop offset="100%" stopColor="#6366F1" />
-                  </linearGradient>
-                </defs>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -359,6 +386,12 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           <CardContent className="relative">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={sectorData}>
+                <defs>
+                  <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                 <XAxis dataKey="sector" angle={-45} textAnchor="end" height={80} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
                 <YAxis domain={[0, 1]} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
@@ -367,12 +400,6 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
                   contentStyle={{ backgroundColor: '#00000090', border: '1px solid #ffffff20', borderRadius: '8px', color: '#ffffff' }}
                 />
                 <Bar dataKey="avgOverallScore" fill="url(#emeraldGradient)" />
-                <defs>
-                  <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10B981" />
-                    <stop offset="100%" stopColor="#059669" />
-                  </linearGradient>
-                </defs>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

@@ -58,7 +58,10 @@ export class InvestmentScoringEngine {
 
     // LTM Revenue Growth (10%)
     if (metrics.ltmRevenueGrowth !== undefined) {
-      scores.push(this.normalizeGrowthMetric(metrics.ltmRevenueGrowth) * this.growthWeights.LTM_REVENUE_GROWTH)
+      const normalizedScore = this.normalizeGrowthMetric(metrics.ltmRevenueGrowth)
+      const weightedScore = normalizedScore * this.growthWeights.LTM_REVENUE_GROWTH
+      scores.push(weightedScore)
+      console.log(`Revenue Growth: ${(metrics.ltmRevenueGrowth * 100).toFixed(1)}% -> normalized: ${normalizedScore.toFixed(3)} -> weighted: ${weightedScore.toFixed(3)}`)
     }
 
     // LTM FCF Growth (10%)
@@ -144,19 +147,22 @@ export class InvestmentScoringEngine {
   // Normalization functions to convert metrics to 0-1 scale
   private normalizeGrowthMetric(growth: number): number {
     // Growth rate normalization: 0% = 0.5, 20%+ = 1.0, negative = 0-0.5
-    if (growth >= 20) return 1.0
-    if (growth >= 0) return 0.5 + (growth / 40) // 0-20% maps to 0.5-1.0
-    return Math.max(0, 0.5 + (growth / 40)) // Negative growth maps to 0-0.5
+    // growth is in decimal format (0.2 = 20%)
+    if (growth >= 0.2) return 1.0
+    if (growth >= 0) return 0.5 + (growth / 0.4) // 0-20% maps to 0.5-1.0
+    return Math.max(0, 0.5 + (growth / 0.4)) // Negative growth maps to 0-0.5
   }
 
   private normalizeMarginMetric(margin: number): number {
     // Margin normalization: assume 0-50% is reasonable range
-    return Math.min(1.0, Math.max(0, margin / 50))
+    // margin is in decimal format (0.5 = 50%)
+    return Math.min(1.0, Math.max(0, margin / 0.5))
   }
 
   private normalizeRoicMetric(roic: number): number {
     // ROIC normalization: 15%+ is excellent, 0% is poor
-    return Math.min(1.0, Math.max(0, roic / 15))
+    // roic is in decimal format (0.15 = 15%)
+    return Math.min(1.0, Math.max(0, roic / 0.15))
   }
 
   private normalizeDebtMetric(debtToEbitda: number): number {

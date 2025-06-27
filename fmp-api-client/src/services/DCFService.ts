@@ -24,7 +24,7 @@ export class DCFService {
     const response = await this.httpClient.get<DCFValuation[]>(
       `/discounted-cash-flow/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -34,7 +34,7 @@ export class DCFService {
     const response = await this.httpClient.get<AdvancedDCF[]>(
       `/advanced-discounted-cash-flow/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -58,7 +58,7 @@ export class DCFService {
       `/historical-discounted-cash-flow-statement/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -68,7 +68,7 @@ export class DCFService {
     const response = await this.httpClient.get<WACC[]>(
       `/wacc/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -82,7 +82,7 @@ export class DCFService {
       `/custom-discounted-cash-flow/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -112,7 +112,7 @@ export class DCFService {
       `/dcf-sensitivity-analysis/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -122,7 +122,7 @@ export class DCFService {
     const response = await this.httpClient.get<DCFAssumptions>(
       `/dcf-assumptions/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -136,7 +136,7 @@ export class DCFService {
       `/dcf-assumptions/${symbol}`,
       assumptions
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -146,7 +146,7 @@ export class DCFService {
     const response = await this.httpClient.get<DCFComponents>(
       `/dcf-components/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -156,7 +156,7 @@ export class DCFService {
     const response = await this.httpClient.get<DCFRating>(
       `/dcf-rating/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -178,7 +178,7 @@ export class DCFService {
       `/monte-carlo-dcf/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -188,7 +188,7 @@ export class DCFService {
     const response = await this.httpClient.get<SectorDCFComparison>(
       `/sector-dcf-comparison/${sector}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -254,7 +254,7 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/dcf-with-benchmarks/${symbol}?industry=${industry}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -265,7 +265,7 @@ export class DCFService {
     const response = await this.httpClient.get<Record<string, DCFValuation[]>>(
       `/discounted-cash-flow/${symbolList}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -287,7 +287,7 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/levered-unlevered-dcf/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -310,7 +310,7 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/sum-of-parts-dcf/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -347,7 +347,7 @@ export class DCFService {
       `/dcf-stress-test/${symbol}`,
       { scenarios }
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -372,7 +372,7 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/terminal-value-analysis/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -396,7 +396,7 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/dcf-confidence-intervals/${symbol}?confidenceLevel=${confidenceLevel}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -421,6 +421,6 @@ export class DCFService {
     const response = await this.httpClient.get(
       `/export-dcf-model/${symbol}?${params.toString()}`
     );
-    return response.data;
+    return response.data as any;
   }
 }

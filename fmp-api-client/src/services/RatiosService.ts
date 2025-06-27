@@ -34,7 +34,7 @@ export class RatiosService {
       `/ratios/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -44,7 +44,7 @@ export class RatiosService {
     const response = await this.httpClient.get<TTMRatios[]>(
       `/ratios-ttm/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -66,7 +66,7 @@ export class RatiosService {
       `/key-metrics/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -76,7 +76,7 @@ export class RatiosService {
     const response = await this.httpClient.get<KeyMetrics[]>(
       `/key-metrics-ttm/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -86,7 +86,7 @@ export class RatiosService {
     const response = await this.httpClient.get<FinancialScore[]>(
       `/score/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -106,7 +106,7 @@ export class RatiosService {
       `/owner_earnings/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -128,7 +128,7 @@ export class RatiosService {
       `/efficiency-ratios/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -150,7 +150,7 @@ export class RatiosService {
       `/leverage-ratios/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -172,7 +172,7 @@ export class RatiosService {
       `/liquidity-ratios/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -194,7 +194,7 @@ export class RatiosService {
       `/profitability-ratios/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -304,7 +304,7 @@ export class RatiosService {
       `/ratios/${symbolList}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -327,7 +327,7 @@ export class RatiosService {
       `/key-metrics/${symbolList}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -335,7 +335,7 @@ export class RatiosService {
    */
   async getPERatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-pe-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -354,7 +354,7 @@ export class RatiosService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get(`/historical-pe-ratio/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -362,7 +362,7 @@ export class RatiosService {
    */
   async getPriceToBookRatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-price-to-book-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -370,7 +370,7 @@ export class RatiosService {
    */
   async getPriceToSalesRatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-price-to-sales-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -378,7 +378,7 @@ export class RatiosService {
    */
   async getEVToEBITDARatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-ev-to-ebitda/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -386,7 +386,7 @@ export class RatiosService {
    */
   async getEVToOperatingCashFlowRatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-ev-to-operating-cash-flow/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -394,7 +394,7 @@ export class RatiosService {
    */
   async getEVToFreeCashFlowRatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-ev-to-free-cash-flow/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -402,7 +402,7 @@ export class RatiosService {
    */
   async getDebtToEquityRatios(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-debt-to-equity/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -410,7 +410,7 @@ export class RatiosService {
    */
   async getReturnOnEquity(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-roe/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -418,7 +418,7 @@ export class RatiosService {
    */
   async getReturnOnAssets(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-roa/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -426,7 +426,7 @@ export class RatiosService {
    */
   async getReturnOnInvestedCapital(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-roic/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -434,7 +434,7 @@ export class RatiosService {
    */
   async getCurrentRatioHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-current-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -442,7 +442,7 @@ export class RatiosService {
    */
   async getQuickRatioHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-quick-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -450,7 +450,7 @@ export class RatiosService {
    */
   async getCashRatioHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-cash-ratio/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -458,7 +458,7 @@ export class RatiosService {
    */
   async getGrossMarginHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-gross-margin/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -466,7 +466,7 @@ export class RatiosService {
    */
   async getOperatingMarginHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-operating-margin/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -474,7 +474,7 @@ export class RatiosService {
    */
   async getNetMarginHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-net-margin/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -482,7 +482,7 @@ export class RatiosService {
    */
   async getDividendYieldHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-dividend-yield/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -490,7 +490,7 @@ export class RatiosService {
    */
   async getWorkingCapitalHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-working-capital/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -498,7 +498,7 @@ export class RatiosService {
    */
   async getAssetTurnoverHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-asset-turnover/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -506,7 +506,7 @@ export class RatiosService {
    */
   async getInventoryTurnoverHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-inventory-turnover/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -514,7 +514,7 @@ export class RatiosService {
    */
   async getReceivablesTurnoverHistory(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/historical-receivables-turnover/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**

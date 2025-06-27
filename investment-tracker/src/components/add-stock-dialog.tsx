@@ -37,6 +37,7 @@ export function AddStockDialog({ open, onOpenChange }: AddStockDialogProps) {
   const [quantity, setQuantity] = useState('')
   const [avgPrice, setAvgPrice] = useState('')
   const [notes, setNotes] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
 
   const utils = trpc.useUtils()
   
@@ -75,28 +76,33 @@ export function AddStockDialog({ open, onOpenChange }: AddStockDialogProps) {
     setNotes('')
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (ticker.trim()) {
-      // For now, we'll proceed to the details step
-      // In a full implementation, we'd search for the ticker using the financial API
-      setStep('details')
-      
-      // Simulate setting stock name based on common tickers
-      const commonTickers: Record<string, { name: string; sector: string }> = {
-        'AAPL': { name: 'Apple Inc.', sector: 'Technology' },
-        'MSFT': { name: 'Microsoft Corporation', sector: 'Technology' },
-        'GOOGL': { name: 'Alphabet Inc.', sector: 'Technology' },
-        'AMZN': { name: 'Amazon.com Inc.', sector: 'Consumer Discretionary' },
-        'TSLA': { name: 'Tesla Inc.', sector: 'Consumer Discretionary' },
-        'NVDA': { name: 'NVIDIA Corporation', sector: 'Technology' },
-      }
-      
-      const tickerUpper = ticker.toUpperCase()
-      if (commonTickers[tickerUpper]) {
-        setStockName(commonTickers[tickerUpper].name)
-        setSector(commonTickers[tickerUpper].sector)
-      } else {
-        setStockName(`${tickerUpper} Corporation`)
+      setIsSearching(true)
+      try {
+        // Search for the ticker using the FMP API
+        const searchResults = await utils.client.searchSymbols.query({ query: ticker.trim() })
+        
+        if (searchResults && searchResults.length > 0) {
+          const result = searchResults[0]
+          setStockName(result.name)
+          setCurrency(result.currency || 'USD')
+          setTicker(result.ticker.toUpperCase())
+          setStep('details')
+        } else {
+          // If no results found, still allow manual entry
+          setTicker(ticker.toUpperCase())
+          setStockName(`${ticker.toUpperCase()} Corporation`)
+          setStep('details')
+        }
+      } catch (error) {
+        console.error('Error searching for ticker:', error)
+        // Fallback to manual entry
+        setTicker(ticker.toUpperCase())
+        setStockName(`${ticker.toUpperCase()} Corporation`)
+        setStep('details')
+      } finally {
+        setIsSearching(false)
       }
     }
   }
@@ -143,8 +149,8 @@ export function AddStockDialog({ open, onOpenChange }: AddStockDialogProps) {
                   onChange={(e) => setTicker(e.target.value.toUpperCase())}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <Button onClick={handleSearch} disabled={!ticker.trim()}>
-                  <Search className="h-4 w-4" />
+                <Button onClick={handleSearch} disabled={!ticker.trim() || isSearching}>
+                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -260,9 +266,9 @@ export function AddStockDialog({ open, onOpenChange }: AddStockDialogProps) {
 
         <DialogFooter>
           {step === 'search' ? (
-            <Button onClick={handleSearch} disabled={!ticker.trim()}>
-              <Search className="h-4 w-4 mr-2" />
-              Search
+            <Button onClick={handleSearch} disabled={!ticker.trim() || isSearching}>
+              {isSearching ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+              {isSearching ? 'Searching...' : 'Search'}
             </Button>
           ) : (
             <div className="flex gap-2">

@@ -36,7 +36,7 @@ export class FinancialStatementsService {
       `/income-statement/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -62,7 +62,7 @@ export class FinancialStatementsService {
       `/balance-sheet-statement/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -88,7 +88,7 @@ export class FinancialStatementsService {
       `/cash-flow-statement/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -223,7 +223,7 @@ export class FinancialStatementsService {
       `/financial-growth/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -233,7 +233,7 @@ export class FinancialStatementsService {
     const response = await this.httpClient.get<KeyMetricsTTM[]>(
       `/key-metrics-ttm/${symbol}`
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -255,7 +255,7 @@ export class FinancialStatementsService {
       `/key-metrics/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -277,7 +277,7 @@ export class FinancialStatementsService {
       `/enterprise-values/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -301,7 +301,7 @@ export class FinancialStatementsService {
       `/financial-statement-full-as-reported/${symbol}?statement=${statementType}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -311,7 +311,7 @@ export class FinancialStatementsService {
     const response = await this.httpClient.get<{ symbol: string }[]>(
       '/financial-statement-symbol-lists'
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -334,7 +334,7 @@ export class FinancialStatementsService {
       `/income-statement/${symbolList}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -357,7 +357,7 @@ export class FinancialStatementsService {
       `/balance-sheet-statement/${symbolList}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -380,7 +380,7 @@ export class FinancialStatementsService {
       `/cash-flow-statement/${symbolList}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -388,7 +388,7 @@ export class FinancialStatementsService {
    */
   async getSharesFloat(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/shares_float/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -396,7 +396,7 @@ export class FinancialStatementsService {
    */
   async getAllSharesFloat(): Promise<any[]> {
     const response = await this.httpClient.get('/shares_float');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -418,7 +418,7 @@ export class FinancialStatementsService {
       `/revenue-geographic-segmentation/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -440,7 +440,7 @@ export class FinancialStatementsService {
       `/revenue-product-segmentation/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -448,7 +448,7 @@ export class FinancialStatementsService {
    */
   async getFiscalDates(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/fiscal-dates/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -467,7 +467,7 @@ export class FinancialStatementsService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get(`/analyst-estimates/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -490,6 +490,6 @@ export class FinancialStatementsService {
       `/financial-statement-full-as-reported/${symbol}?statement=${statement}&standardized=true`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 }

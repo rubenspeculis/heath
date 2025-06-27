@@ -179,6 +179,15 @@ export const appRouter = router({
       })
     }),
 
+  // Search operations
+  searchSymbols: publicProcedure
+    .input(z.object({
+      query: z.string().min(1),
+    }))
+    .query(async ({ input }) => {
+      return await fmpFinancialApi.searchSymbols(input.query)
+    }),
+
   // Real-time data operations
   refreshStockPrice: publicProcedure
     .input(z.object({
@@ -239,7 +248,7 @@ export const appRouter = router({
         }
       })
 
-      console.log(`Found ${watchlistStocks.length} stocks to update:`, watchlistStocks.map(s => s.ticker))
+      console.log(`Found ${watchlistStocks.length} stocks to update:`, watchlistStocks.map((s: any) => s.ticker))
 
       const results = []
       for (const stock of watchlistStocks) {
@@ -262,6 +271,125 @@ export const appRouter = router({
           }
         } catch (error) {
           console.error(`Error updating ${stock.ticker}:`, error)
+        }
+      }
+      return results
+    }),
+
+  refreshAllFinancialData: publicProcedure
+    .mutation(async () => {
+      const watchlistStocks = await db.stock.findMany({
+        where: {
+          watchlistItems: {
+            some: {
+              status: {
+                in: ['WATCHING', 'OWNED']
+              }
+            }
+          }
+        }
+      })
+
+      console.log(`Found ${watchlistStocks.length} stocks to fetch financial data for:`, watchlistStocks.map((s: any) => s.ticker))
+
+      const results = []
+      for (const stock of watchlistStocks) {
+        try {
+          console.log(`Fetching financial data for ${stock.ticker}...`)
+          const financialData = await fmpFinancialApi.getFinancialData(stock.ticker)
+          console.log(`Financial data for ${stock.ticker}:`, financialData)
+          
+          if (financialData) {
+            // Find existing record first
+            const existing = await db.financialData.findFirst({
+              where: {
+                stockId: stock.id,
+                period: 'annual',
+              },
+            })
+
+            const financialRecord = {
+              stockId: stock.id,
+              period: 'annual',
+              revenue: financialData.revenue,
+              revenueGrowth: financialData.revenueGrowth,
+              ebitda: financialData.ebitda,
+              ebitdaMargin: financialData.ebitdaMargin,
+              eps: financialData.eps,
+              epsGrowth: financialData.epsGrowth,
+              fcf: financialData.fcf,
+              fcfMargin: financialData.fcfMargin,
+              fcfGrowth: financialData.fcfGrowth,
+              grossMargin: financialData.grossMargin,
+              roic: financialData.roic,
+              debtToEbitda: financialData.debtToEbitda,
+              peRatio: financialData.peRatio,
+              forwardPE: financialData.forwardPE,
+              shareDilution: financialData.shareDilution,
+              dataDate: new Date(financialData.date || new Date()),
+            }
+
+            if (existing) {
+              const updated = await db.financialData.update({
+                where: { id: existing.id },
+                data: financialRecord,
+              })
+              results.push({ stock: stock.ticker, financial: updated })
+            } else {
+              const created = await db.financialData.create({
+                data: financialRecord,
+              })
+              results.push({ stock: stock.ticker, financial: created })
+            }
+            console.log(`Updated financial data for ${stock.ticker}`)
+          }
+        } catch (error) {
+          console.error(`Error fetching financial data for ${stock.ticker}:`, error)
+        }
+      }
+      return results
+    }),
+
+  enrichAllStockData: publicProcedure
+    .mutation(async () => {
+      const stocks = await db.stock.findMany({
+        where: {
+          OR: [
+            { sector: null },
+            { exchange: null },
+            { industry: null },
+            { marketCap: null }
+          ]
+        }
+      })
+
+      console.log(`Found ${stocks.length} stocks missing data to enrich:`, stocks.map((s: any) => s.ticker))
+
+      const results = []
+      for (const stock of stocks) {
+        try {
+          console.log(`Enriching data for ${stock.ticker}...`)
+          const profile = await fmpFinancialApi.getCompanyProfile(stock.ticker)
+          
+          if (profile) {
+            const updated = await db.stock.update({
+              where: { id: stock.id },
+              data: {
+                name: profile.name || stock.name,
+                currency: profile.currency || stock.currency,
+                exchange: profile.exchange || stock.exchange,
+                industry: profile.industry || stock.industry,
+                sector: profile.sector || stock.sector,
+                marketCap: profile.marketCap || stock.marketCap,
+                price: profile.price || stock.price,
+                updatedAt: new Date(),
+              },
+            })
+            results.push(updated)
+            console.log(`Enriched ${stock.ticker} with sector: ${profile.sector}, exchange: ${profile.exchange}`)
+          }
+        } catch (error) {
+          console.error(`Error enriching data for ${stock.ticker}:`, error)
         }
       }
       return results

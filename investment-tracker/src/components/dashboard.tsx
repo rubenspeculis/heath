@@ -11,6 +11,8 @@ import { PortfolioCharts } from './portfolio-charts'
 import { WatchlistAnalysis } from './watchlist-analysis'
 import { InvestmentAnalysisCharts } from './investment-analysis-charts'
 import { RefreshPricesButton } from './refresh-prices-button'
+import { RefreshFinancialDataButton } from './refresh-financial-data-button'
+import { EnrichStockDataButton } from './enrich-stock-data-button'
 import { exportService } from '@/lib/export'
 import {
   DropdownMenu,
@@ -25,15 +27,15 @@ export function Dashboard() {
   const { data: watchlist, isLoading: watchlistLoading } = trpc.getWatchlist.useQuery()
   const { data: stocks } = trpc.getStocks.useQuery()
 
-  const ownedStocks = watchlist?.filter(item => item.status === 'OWNED') || []
-  const watchingStocks = watchlist?.filter(item => item.status === 'WATCHING') || []
+  const ownedStocks = watchlist?.filter((item: any) => item.status === 'OWNED') || []
+  const watchingStocks = watchlist?.filter((item: any) => item.status === 'WATCHING') || []
   
-  const totalPortfolioValue = ownedStocks.reduce((sum, item) => {
+  const totalPortfolioValue = ownedStocks.reduce((sum: number, item: any) => {
     const value = (item.quantity || 0) * (item.stock.price || 0)
     return sum + value
   }, 0)
 
-  const totalGainLoss = ownedStocks.reduce((sum, item) => {
+  const totalGainLoss = ownedStocks.reduce((sum: number, item: any) => {
     const currentValue = (item.quantity || 0) * (item.stock.price || 0)
     const costBasis = (item.quantity || 0) * (item.avgPrice || 0)
     return sum + (currentValue - costBasis)
@@ -86,6 +88,8 @@ export function Dashboard() {
               </div>
               <div className="flex gap-4">
                 <RefreshPricesButton />
+                <RefreshFinancialDataButton />
+                <EnrichStockDataButton />
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -276,7 +280,10 @@ export function Dashboard() {
                       >
                         Add New Stock
                       </Button>
-                      <RefreshPricesButton />
+                      <div className="flex gap-2">
+                        <RefreshPricesButton />
+                        <RefreshFinancialDataButton />
+                      </div>
                     </div>
                   </div>
                 </div>

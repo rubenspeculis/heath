@@ -97,7 +97,16 @@ export class FMPApiClient {
    * @param newConfig - Partial configuration to merge with current config
    */
   public updateConfig(newConfig: Partial<FMPClientConfig>): void {
-    this.httpClient.updateConfig(newConfig);
+    // Convert FMPClientConfig to ResolvedFMPClientConfig format
+    const resolvedConfig: Partial<any> = { ...newConfig };
+    if (newConfig.rateLimit) {
+      resolvedConfig.rateLimit = {
+        requestsPerMinute: newConfig.rateLimit.requestsPerMinute,
+        burstSize: newConfig.rateLimit.burstSize ?? newConfig.rateLimit.requestsPerMinute,
+        enabled: newConfig.rateLimit.enabled ?? true,
+      };
+    }
+    this.httpClient.updateConfig(resolvedConfig as Partial<any>);
   }
 
   /**
@@ -367,7 +376,7 @@ export class FMPApiClient {
         change: quote?.change,
         changePercent: quote?.changesPercentage,
         marketCap: quote?.marketCap,
-        exchange: result.exchange || 'Unknown',
+        exchange: result.exchangeShortName || 'Unknown',
       };
     });
   }

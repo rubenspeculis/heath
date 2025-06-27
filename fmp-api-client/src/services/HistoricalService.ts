@@ -53,7 +53,7 @@ export class HistoricalService {
       `/historical-chart/${interval}/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -77,7 +77,7 @@ export class HistoricalService {
       `/historical-market-capitalization/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -85,7 +85,7 @@ export class HistoricalService {
    */
   async getHistoricalStockSplits(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/stock_split/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -107,7 +107,7 @@ export class HistoricalService {
       `/historical-price-full/stock_dividend/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -225,7 +225,7 @@ export class HistoricalService {
       `/historical-analyst-estimates/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -243,7 +243,7 @@ export class HistoricalService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get('/sectors-performance', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -263,9 +263,9 @@ export class HistoricalService {
     ]);
 
     return {
-      gainers: gainers.data,
-      losers: losers.data,
-      mostActive: mostActive.data,
+      gainers: gainers.data as any[],
+      losers: losers.data as any[],
+      mostActive: mostActive.data as any[],
     };
   }
 
@@ -284,7 +284,7 @@ export class HistoricalService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get('/treasury', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -303,7 +303,7 @@ export class HistoricalService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get(`/economic/${indicator}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -320,7 +320,7 @@ export class HistoricalService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get(`/insider-trading/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -339,7 +339,7 @@ export class HistoricalService {
     if (options.date) params.date = options.date;
 
     const response = await this.httpClient.get(`/institutional-holder/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -356,7 +356,7 @@ export class HistoricalService {
     if (options.date) params.date = options.date;
 
     const response = await this.httpClient.get(`/mutual-fund-holder/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -373,7 +373,7 @@ export class HistoricalService {
     if (options.date) params.date = options.date;
 
     const response = await this.httpClient.get(`/etf-holder/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -395,7 +395,7 @@ export class HistoricalService {
       `/revenue-product-segmentation/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -417,7 +417,7 @@ export class HistoricalService {
       `/revenue-geographic-segmentation/${symbol}`,
       params
     );
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -434,7 +434,7 @@ export class HistoricalService {
     if (options.page) params.page = options.page;
 
     const response = await this.httpClient.get(`/historical/social-sentiment/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -533,7 +533,7 @@ export class HistoricalService {
     if (options.symbol) params.symbol = options.symbol;
 
     const response = await this.httpClient.get('/earning_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -551,7 +551,7 @@ export class HistoricalService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get('/ipo_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -588,6 +588,6 @@ export class HistoricalService {
     });
 
     const response = await this.httpClient.get(`/stock-screener?${params.toString()}`);
-    return response.data;
+    return response.data as any;
   }
 }

@@ -30,6 +30,12 @@ interface SearchResult {
 export class FMPFinancialApiService {
   private client: FMPApiClient
 
+  private normalizeSymbol(symbol: string): string {
+    // Remove common foreign exchange suffixes that FMP might not support
+    // FMP primarily supports US markets
+    return symbol.replace(/\.(ST|HK|L|WA|TO|V|DE|PA|MI)$/i, '')
+  }
+
   constructor() {
     const apiKey = process.env.FMP_API_KEY
     if (!apiKey) {
@@ -38,10 +44,10 @@ export class FMPFinancialApiService {
 
     this.client = new FMPApiClient({
       apiKey: apiKey || 'demo',
-      baseURL: 'https://financialmodelingprep.com/api/v3',
+      baseUrl: 'https://financialmodelingprep.com/api/v3',
       timeout: 10000,
       rateLimit: {
-        requestsPerSecond: 5,
+        requestsPerMinute: 300,
         burstSize: 10
       }
     })
@@ -49,10 +55,11 @@ export class FMPFinancialApiService {
 
   async getStockQuote(symbol: string): Promise<StockQuote | null> {
     try {
-      console.log(`Fetching quote for ${symbol} from FMP...`)
-      const quotes = await this.client.quotes.getRealTimeQuote(symbol)
+      const normalizedSymbol = this.normalizeSymbol(symbol)
+      console.log(`Fetching quote for ${symbol} (normalized: ${normalizedSymbol}) from FMP...`)
+      const quotes = await this.client.quotes.getRealTimeQuote(normalizedSymbol) as unknown as any[]
       
-      if (!quotes || quotes.length === 0) {
+      if (!quotes || !Array.isArray(quotes) || quotes.length === 0) {
         console.log(`No quote found for ${symbol}`)
         return null
       }
@@ -73,15 +80,15 @@ export class FMPFinancialApiService {
 
   async getCompanyProfile(symbol: string): Promise<CompanyProfile | null> {
     try {
-      console.log(`Fetching company profile for ${symbol} from FMP...`)
-      const profiles = await this.client.company.getCompanyProfile(symbol)
+      const normalizedSymbol = this.normalizeSymbol(symbol)
+      console.log(`Fetching company profile for ${symbol} (normalized: ${normalizedSymbol}) from FMP...`)
+      const profile = await this.client.companies.getProfile(normalizedSymbol)
       
-      if (!profiles || profiles.length === 0) {
+      if (!profile) {
         console.log(`No profile found for ${symbol}`)
         return null
       }
 
-      const profile = profiles[0]
       return {
         symbol: profile.symbol,
         name: profile.companyName,
@@ -89,8 +96,8 @@ export class FMPFinancialApiService {
         exchange: profile.exchangeShortName || 'Unknown',
         industry: profile.industry,
         sector: profile.sector,
-        marketCap: profile.mktCap,
-        price: profile.price
+        marketCap: typeof profile.mktCap === 'number' ? profile.mktCap : undefined,
+        price: typeof profile.price === 'number' ? profile.price : undefined
       }
     } catch (error) {
       console.error(`Error fetching profile for ${symbol}:`, error)
@@ -101,14 +108,14 @@ export class FMPFinancialApiService {
   async searchSymbols(query: string): Promise<SearchResult[]> {
     try {
       console.log(`Searching symbols for "${query}" from FMP...`)
-      const results = await this.client.company.searchCompanies(query)
+      const results = await this.client.companies.searchCompanies(query, { limit: 10 })
       
       if (!results || results.length === 0) {
         console.log(`No search results for "${query}"`)
         return []
       }
 
-      return results.map(result => ({
+      return results.map((result) => ({
         ticker: result.symbol,
         name: result.name,
         type: 'Common Stock',
@@ -123,13 +130,14 @@ export class FMPFinancialApiService {
 
   async getFinancialData(symbol: string) {
     try {
-      console.log(`Fetching financial data for ${symbol} from FMP...`)
+      const normalizedSymbol = this.normalizeSymbol(symbol)
+      console.log(`Fetching financial data for ${symbol} (normalized: ${normalizedSymbol}) from FMP...`)
       
-      // Get income statements for financial metrics
-      const incomeStatements = await this.client.financialStatements.getIncomeStatements(symbol, { period: 'annual', limit: 1 })
-      const balanceSheets = await this.client.financialStatements.getBalanceSheetStatements(symbol, { period: 'annual', limit: 1 })
-      const cashFlows = await this.client.financialStatements.getCashFlowStatements(symbol, { period: 'annual', limit: 1 })
-      const ratios = await this.client.ratios.getFinancialRatios(symbol, { period: 'annual', limit: 1 })
+      // Get income statements for financial metrics (current + previous year for growth calculation)
+      const incomeStatements = await this.client.financialStatements.getIncomeStatements(normalizedSymbol, { period: 'annual', limit: 2 })
+      const balanceSheets = await this.client.financialStatements.getBalanceSheetStatements(normalizedSymbol, { period: 'annual', limit: 1 })
+      const cashFlows = await this.client.financialStatements.getCashFlowStatements(normalizedSymbol, { period: 'annual', limit: 2 })
+      const ratios = await this.client.ratios.getFinancialRatios(normalizedSymbol, { period: 'annual', limit: 1 })
 
       if (!incomeStatements?.[0] || !balanceSheets?.[0] || !cashFlows?.[0]) {
         console.log(`Incomplete financial data for ${symbol}`)
@@ -137,26 +145,47 @@ export class FMPFinancialApiService {
       }
 
       const income = incomeStatements[0]
+      const previousIncome = incomeStatements[1]
       const balance = balanceSheets[0]
       const cashFlow = cashFlows[0]
+      const previousCashFlow = cashFlows[1]
       const ratio = ratios?.[0]
+
+      // Calculate growth rates (as decimals, not percentages)
+      const revenueGrowth = income.revenue && previousIncome?.revenue 
+        ? (income.revenue - previousIncome.revenue) / previousIncome.revenue 
+        : null
+
+      const epsGrowth = income.eps && previousIncome?.eps 
+        ? (income.eps - previousIncome.eps) / previousIncome.eps 
+        : null
+
+      const fcfGrowth = cashFlow.freeCashFlow && previousCashFlow?.freeCashFlow 
+        ? (cashFlow.freeCashFlow - previousCashFlow.freeCashFlow) / previousCashFlow.freeCashFlow 
+        : null
+
+      console.log(`Growth rates for ${symbol}:`, {
+        revenueGrowth: revenueGrowth ? `${(revenueGrowth * 100).toFixed(1)}%` : 'N/A',
+        epsGrowth: epsGrowth ? `${(epsGrowth * 100).toFixed(1)}%` : 'N/A',
+        fcfGrowth: fcfGrowth ? `${(fcfGrowth * 100).toFixed(1)}%` : 'N/A',
+      })
 
       return {
         symbol,
         date: income.date,
         revenue: income.revenue,
-        revenueGrowth: income.revenueGrowth,
+        revenueGrowth,
         ebitda: income.ebitda,
-        ebitdaMargin: income.ebitda && income.revenue ? (income.ebitda / income.revenue) * 100 : null,
+        ebitdaMargin: income.ebitda && income.revenue ? (income.ebitda / income.revenue) : null,
         eps: income.eps,
-        epsGrowth: income.epsgrowth,
+        epsGrowth,
         fcf: cashFlow.freeCashFlow,
-        fcfMargin: cashFlow.freeCashFlow && income.revenue ? (cashFlow.freeCashFlow / income.revenue) * 100 : null,
-        fcfGrowth: null, // Would need historical data to calculate
-        grossMargin: income.grossProfit && income.revenue ? (income.grossProfit / income.revenue) * 100 : null,
-        roic: ratio?.roic,
+        fcfMargin: cashFlow.freeCashFlow && income.revenue ? (cashFlow.freeCashFlow / income.revenue) : null,
+        fcfGrowth,
+        grossMargin: income.grossProfit && income.revenue ? (income.grossProfit / income.revenue) : null,
+        roic: (ratio as any)?.roic ? (ratio as any).roic / 100 : null, // Convert percentage to decimal
         debtToEbitda: balance.totalDebt && income.ebitda ? balance.totalDebt / income.ebitda : null,
-        peRatio: ratio?.peRatio,
+        peRatio: (ratio as any)?.peRatio,
         forwardPE: null, // Would need forward earnings estimates
         shareDilution: null // Would need historical share count data
       }

@@ -28,7 +28,7 @@ export class QuoteService {
   async getRealTimeQuotes(symbols: string[]): Promise<StockQuote[]> {
     const symbolList = symbols.join(',');
     const response = await this.httpClient.get<StockQuote[]>(`/quote/${symbolList}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -53,7 +53,7 @@ export class QuoteService {
   async getCompanyProfiles(symbols: string[]): Promise<CompanyProfile[]> {
     const symbolList = symbols.join(',');
     const response = await this.httpClient.get<CompanyProfile[]>(`/profile/${symbolList}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -122,7 +122,7 @@ export class QuoteService {
       params
     );
     
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -147,7 +147,7 @@ export class QuoteService {
   async getMarketHours(exchange?: string): Promise<any> {
     const params = exchange ? { exchange } : {};
     const response = await this.httpClient.get('/market-hours', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -155,7 +155,7 @@ export class QuoteService {
    */
   async isMarketOpen(): Promise<{ isMarketOpen: boolean }> {
     const response = await this.httpClient.get<{ isMarketOpen: boolean }>('/is-the-market-open');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -163,7 +163,7 @@ export class QuoteService {
    */
   async getMostActiveStocks(): Promise<MostActiveStock[]> {
     const response = await this.httpClient.get<MostActiveStock[]>('/stock_market/actives');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -171,7 +171,7 @@ export class QuoteService {
    */
   async getTopGainers(): Promise<StockGainerLoser[]> {
     const response = await this.httpClient.get<StockGainerLoser[]>('/stock_market/gainers');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -179,7 +179,7 @@ export class QuoteService {
    */
   async getTopLosers(): Promise<StockGainerLoser[]> {
     const response = await this.httpClient.get<StockGainerLoser[]>('/stock_market/losers');
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -200,7 +200,7 @@ export class QuoteService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get(`/historical-market-capitalization/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -218,7 +218,7 @@ export class QuoteService {
     if (options.symbol) params.symbol = options.symbol;
 
     const response = await this.httpClient.get<EarningsCalendar[]>('/earning_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -244,7 +244,7 @@ export class QuoteService {
     if (options.symbol) params.symbol = options.symbol;
 
     const response = await this.httpClient.get('/stock_dividend_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -262,7 +262,7 @@ export class QuoteService {
     if (options.symbol) params.symbol = options.symbol;
 
     const response = await this.httpClient.get('/stock_split_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -278,7 +278,7 @@ export class QuoteService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get('/ipo_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -294,7 +294,7 @@ export class QuoteService {
     if (options.to) params.to = options.to;
 
     const response = await this.httpClient.get('/economic_calendar', params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -302,7 +302,7 @@ export class QuoteService {
    */
   async getPriceTarget(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/price-target/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -321,7 +321,7 @@ export class QuoteService {
     if (options.limit) params.limit = options.limit;
 
     const response = await this.httpClient.get(`/analyst-estimates/${symbol}`, params);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -329,7 +329,7 @@ export class QuoteService {
    */
   async getUpgradesDowngrades(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/upgrades-downgrades/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 
   /**
@@ -337,6 +337,6 @@ export class QuoteService {
    */
   async getEarningsSurprises(symbol: string): Promise<any[]> {
     const response = await this.httpClient.get(`/earnings-surprises/${symbol}`);
-    return response.data;
+    return response.data as any;
   }
 }
