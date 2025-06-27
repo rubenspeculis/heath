@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Stock {
+  id          String   @id @default(cuid())
+  ticker      String   @unique
+  name        String
+  currency    String   @default("USD")
+  sector      String?
+  industry    String?
+  exchange    String?
+  marketCap   Float?
+  price       Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  watchlistItems WatchlistItem[]
+  financialData  FinancialData[]
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  stockId   String
+  status    String   @default("WATCHING") // WATCHING, OWNED, SOLD
+  quantity  Float?
+  avgPrice  Float?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@index([stockId])
+}
+
+model FinancialData {
+  id                    String   @id @default(cuid())
+  stockId               String
+  period                String   // LTM, Forward1Y, Forward3Y
+  revenue               Float?
+  revenueGrowth         Float?
+  ebitda                Float?
+  ebitdaMargin          Float?
+  ebit                  Float?
+  netIncome             Float?
+  eps                   Float?
+  epsGrowth             Float?
+  fcf                   Float?
+  fcfMargin             Float?
+  fcfGrowth             Float?
+  grossMargin           Float?
+  roic                  Float?
+  debtToEbitda          Float?
+  enterpriseValue       Float?
+  peRatio               Float?
+  forwardPE             Float?
+  shareDilution         Float?
+  dataDate              DateTime
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@index([stockId, period])
+}
+
+model MetricWeight {
+  id          String  @id @default(cuid())
+  category    String  // GROWTH, QUALITY
+  metricName  String
+  weight      Float
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category, metricName])
+}
+
+model ExchangeRate {
+  id        String   @id @default(cuid())
+  fromCcy   String
+  toCcy     String
+  rate      Float
+  updatedAt DateTime @updatedAt
+
+  @@unique([fromCcy, toCcy])
+}
+
+model ApiKey {
+  id       String @id @default(cuid())
+  provider String @unique // ALPHA_VANTAGE, FMP
+  key      String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
