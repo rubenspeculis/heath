@@ -444,21 +444,49 @@ export const appRouter = router({
 
   enrichAllStockData: publicProcedure
     .mutation(async () => {
+      // Find stocks that either have missing data OR haven't been enriched recently (24 hours)
       const stocks = await db.stock.findMany({
         where: {
           OR: [
             { sector: null },
             { exchange: null },
             { industry: null },
-            { marketCap: null }
+            { marketCap: null },
+            // Also include stocks that haven't been updated in 24 hours (for periodic enrichment)
+            {
+              updatedAt: {
+                lt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 24 hours ago
+              }
+            }
           ]
         }
       })
 
-      console.log(`Found ${stocks.length} stocks missing data to enrich:`, stocks.map((s: any) => s.ticker))
+      // Filter out stocks that were recently updated (within 24 hours) and have complete data
+      const stocksNeedingEnrichment = stocks.filter(stock => {
+        const hasIncompleteData = !stock.sector || !stock.exchange || !stock.industry || !stock.marketCap
+        const isStale = shouldRefreshPriceData(stock.updatedAt) // Use same 2-hour cache logic as prices since this updates stock metadata
+        
+        return hasIncompleteData || isStale
+      })
+
+      console.log(`Found ${stocks.length} candidates, ${stocksNeedingEnrichment.length} need enrichment:`, 
+        stocksNeedingEnrichment.map((s: any) => s.ticker))
+
+      if (stocksNeedingEnrichment.length === 0) {
+        console.log('All stock data is complete and fresh, skipping enrichment')
+        return {
+          updated: [],
+          skipped: stocks.length,
+          totalStocks: stocks.length,
+          message: 'All stock data is already complete and fresh'
+        }
+      }
 
       const results = []
-      for (const stock of stocks) {
+      const skipped = []
+
+      for (const stock of stocksNeedingEnrichment) {
         try {
           console.log(`Enriching data for ${stock.ticker}...`)
           const profile = await fmpFinancialApi.getCompanyProfile(stock.ticker)
@@ -484,7 +512,17 @@ export const appRouter = router({
           console.error(`Error enriching data for ${stock.ticker}:`, error)
         }
       }
-      return results
+
+      // Track skipped stocks for reporting
+      const updatedTickers = results.map(r => r.ticker)
+      skipped.push(...stocks.filter(s => !updatedTickers.includes(s.ticker)))
+
+      return {
+        updated: results,
+        skipped: skipped.length,
+        totalStocks: stocks.length,
+        message: `Smart enrichment: Updated ${results.length} stocks, ${skipped.length} were already complete and fresh`
+      }
     }),
 })
 

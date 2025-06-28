@@ -10,15 +10,16 @@ export function EnrichStockDataButton() {
   const utils = trpc.useUtils()
 
   const enrichAllStockData = trpc.enrichAllStockData.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (result) => {
+      const { updated, skipped, message } = result
       setIsEnriching(false)
       utils.getStocks.invalidate()
       utils.getWatchlist.invalidate()
       
       toast({
-        title: "Stock data enriched successfully",
-        description: `Updated ${data.length} stocks with sector, exchange, and industry data.`,
-        duration: 5000,
+        title: "Stock Data Enrichment Complete",
+        description: message || `Updated ${updated.length} stocks, ${skipped} were already complete and fresh`,
+        duration: 4000,
       })
     },
     onError: (error) => {
