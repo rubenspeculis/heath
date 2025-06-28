@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { EditWatchlistDialog } from '@/components/edit-watchlist-dialog'
 import { StockDetailDialog } from '@/components/stock-detail-dialog'
+import { CacheStatusIndicator, DataFreshnessLegend } from '@/components/cache-status-indicator'
 
 interface WatchlistTableProps {
   data: Array<{
@@ -47,6 +48,33 @@ interface WatchlistTableProps {
       currency: string
       sector?: string | null
       exchange?: string | null
+      updatedAt?: Date | string
+      financialData?: Array<{
+        id: string
+        stockId: string
+        period: string
+        revenue?: number | null
+        revenueGrowth?: number | null
+        ebitda?: number | null
+        ebitdaMargin?: number | null
+        ebit?: number | null
+        netIncome?: number | null
+        eps?: number | null
+        epsGrowth?: number | null
+        fcf?: number | null
+        fcfMargin?: number | null
+        fcfGrowth?: number | null
+        grossMargin?: number | null
+        roic?: number | null
+        debtToEbitda?: number | null
+        enterpriseValue?: number | null
+        peRatio?: number | null
+        forwardPE?: number | null
+        shareDilution?: number | null
+        dataDate: Date | string
+        createdAt: Date | string
+        updatedAt: Date | string
+      }> | null
     }
   }>
   isLoading: boolean
@@ -142,6 +170,7 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
             <TableHead className="font-bold text-slate-200 h-12 px-4">Market Value</TableHead>
             <TableHead className="font-bold text-slate-200 h-12 px-4">Gain/Loss</TableHead>
             <TableHead className="font-bold text-slate-200 h-12 px-4">Sector</TableHead>
+            <TableHead className="font-bold text-slate-200 h-12 px-4 text-center">Data</TableHead>
             <TableHead className="font-bold text-slate-200 h-12 px-4 text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -244,6 +273,13 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
                   )}
                 </TableCell>
                 
+                <TableCell className="px-4 py-4 text-center">
+                  <CacheStatusIndicator 
+                    priceUpdatedAt={item.stock.updatedAt ? new Date(item.stock.updatedAt) : undefined}
+                    financialDataUpdatedAt={item.stock.financialData?.[0]?.updatedAt ? new Date(item.stock.financialData[0].updatedAt) : undefined}
+                  />
+                </TableCell>
+                
                 <TableCell className="px-4 py-4">
                   <div className="flex items-center justify-center gap-1">
                     <Button
@@ -343,6 +379,11 @@ export function WatchlistTable({ data, isLoading }: WatchlistTableProps) {
           </div>
         </div>
       )}
+      
+      {/* Data Freshness Legend */}
+      <div className="px-6 py-3 border-t border-slate-700/50">
+        <DataFreshnessLegend />
+      </div>
       
       {editItem && (
         <EditWatchlistDialog 

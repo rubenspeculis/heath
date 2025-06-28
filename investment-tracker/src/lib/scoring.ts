@@ -54,78 +54,124 @@ export class InvestmentScoringEngine {
   }
 
   calculateGrowthScore(metrics: FinancialMetrics): number {
-    const scores: number[] = []
+    const availableMetrics: { score: number; weight: number }[] = []
 
     // LTM Revenue Growth (10%)
     if (metrics.ltmRevenueGrowth !== undefined) {
       const normalizedScore = this.normalizeGrowthMetric(metrics.ltmRevenueGrowth)
-      const weightedScore = normalizedScore * this.growthWeights.LTM_REVENUE_GROWTH
-      scores.push(weightedScore)
-      console.log(`Revenue Growth: ${(metrics.ltmRevenueGrowth * 100).toFixed(1)}% -> normalized: ${normalizedScore.toFixed(3)} -> weighted: ${weightedScore.toFixed(3)}`)
+      availableMetrics.push({
+        score: normalizedScore,
+        weight: this.growthWeights.LTM_REVENUE_GROWTH
+      })
     }
 
     // LTM FCF Growth (10%)
     if (metrics.ltmFcfGrowth !== undefined) {
-      scores.push(this.normalizeGrowthMetric(metrics.ltmFcfGrowth) * this.growthWeights.LTM_FCF_GROWTH)
+      availableMetrics.push({
+        score: this.normalizeGrowthMetric(metrics.ltmFcfGrowth),
+        weight: this.growthWeights.LTM_FCF_GROWTH
+      })
     }
 
     // LTM EPS Growth (10%)
     if (metrics.ltmEpsGrowth !== undefined) {
-      scores.push(this.normalizeGrowthMetric(metrics.ltmEpsGrowth) * this.growthWeights.LTM_EPS_GROWTH)
+      availableMetrics.push({
+        score: this.normalizeGrowthMetric(metrics.ltmEpsGrowth),
+        weight: this.growthWeights.LTM_EPS_GROWTH
+      })
     }
 
     // Forward 3Y Revenue Growth (25%)
     if (metrics.forward3yRevenueGrowth !== undefined) {
-      scores.push(this.normalizeGrowthMetric(metrics.forward3yRevenueGrowth) * this.growthWeights.FORWARD_3Y_REVENUE_GROWTH)
+      availableMetrics.push({
+        score: this.normalizeGrowthMetric(metrics.forward3yRevenueGrowth),
+        weight: this.growthWeights.FORWARD_3Y_REVENUE_GROWTH
+      })
     }
 
     // Forward 3Y EPS Growth (45%)
     if (metrics.forward3yEpsGrowth !== undefined) {
-      scores.push(this.normalizeGrowthMetric(metrics.forward3yEpsGrowth) * this.growthWeights.FORWARD_3Y_EPS_GROWTH)
+      availableMetrics.push({
+        score: this.normalizeGrowthMetric(metrics.forward3yEpsGrowth),
+        weight: this.growthWeights.FORWARD_3Y_EPS_GROWTH
+      })
     }
 
-    // If no growth metrics available, return null to indicate insufficient data
-    if (scores.length === 0) {
+    // If no growth metrics available, return 0
+    if (availableMetrics.length === 0) {
       return 0
     }
 
-    return scores.reduce((sum, score) => sum + score, 0)
+    // Calculate total weight of available metrics
+    const totalAvailableWeight = availableMetrics.reduce((sum, metric) => sum + metric.weight, 0)
+    
+    // Re-weight the available metrics to scale to 1.0
+    const weightedScore = availableMetrics.reduce((sum, metric) => {
+      const normalizedWeight = metric.weight / totalAvailableWeight
+      return sum + (metric.score * normalizedWeight)
+    }, 0)
+
+    return weightedScore
   }
 
   calculateQualityScore(metrics: FinancialMetrics): number {
-    const scores: number[] = []
+    const availableMetrics: { score: number; weight: number }[] = []
 
     // LTM Gross Margin (25%)
     if (metrics.ltmGrossMargin !== undefined) {
-      scores.push(this.normalizeMarginMetric(metrics.ltmGrossMargin) * this.qualityWeights.LTM_GROSS_MARGIN)
+      availableMetrics.push({
+        score: this.normalizeMarginMetric(metrics.ltmGrossMargin),
+        weight: this.qualityWeights.LTM_GROSS_MARGIN
+      })
     }
 
     // LTM ROIC (30%)
     if (metrics.ltmRoic !== undefined) {
-      scores.push(this.normalizeRoicMetric(metrics.ltmRoic) * this.qualityWeights.LTM_ROIC)
+      availableMetrics.push({
+        score: this.normalizeRoicMetric(metrics.ltmRoic),
+        weight: this.qualityWeights.LTM_ROIC
+      })
     }
 
     // LTM Debt to EBITDA (20%) - lower is better
     if (metrics.ltmDebtToEbitda !== undefined) {
-      scores.push(this.normalizeDebtMetric(metrics.ltmDebtToEbitda) * this.qualityWeights.LTM_DEBT_TO_EBITDA)
+      availableMetrics.push({
+        score: this.normalizeDebtMetric(metrics.ltmDebtToEbitda),
+        weight: this.qualityWeights.LTM_DEBT_TO_EBITDA
+      })
     }
 
     // LTM FCF Margin (20%)
     if (metrics.ltmFcfMargin !== undefined) {
-      scores.push(this.normalizeMarginMetric(metrics.ltmFcfMargin) * this.qualityWeights.LTM_FCF_MARGIN)
+      availableMetrics.push({
+        score: this.normalizeMarginMetric(metrics.ltmFcfMargin),
+        weight: this.qualityWeights.LTM_FCF_MARGIN
+      })
     }
 
     // Share Dilution (5%) - lower is better
     if (metrics.shareDilution !== undefined) {
-      scores.push(this.normalizeDilutionMetric(metrics.shareDilution) * this.qualityWeights.SHARE_DILUTION)
+      availableMetrics.push({
+        score: this.normalizeDilutionMetric(metrics.shareDilution),
+        weight: this.qualityWeights.SHARE_DILUTION
+      })
     }
 
-    // If no quality metrics available, return 0 to indicate insufficient data
-    if (scores.length === 0) {
+    // If no quality metrics available, return 0
+    if (availableMetrics.length === 0) {
       return 0
     }
 
-    return scores.reduce((sum, score) => sum + score, 0)
+    // Calculate total weight of available metrics
+    const totalAvailableWeight = availableMetrics.reduce((sum, metric) => sum + metric.weight, 0)
+    
+    // Re-weight the available metrics to scale to 1.0
+    const weightedScore = availableMetrics.reduce((sum, metric) => {
+      const normalizedWeight = metric.weight / totalAvailableWeight
+      return sum + (metric.score * normalizedWeight)
+    }, 0)
+
+    return weightedScore
   }
 
   calculateOverallScore(metrics: FinancialMetrics, growthWeight: number = 0.6, qualityWeight: number = 0.4): {

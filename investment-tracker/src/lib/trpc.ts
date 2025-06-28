@@ -2,6 +2,7 @@ import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
 import { db } from './db'
 import { fmpFinancialApi } from './fmp-financial-api'
+import { shouldRefreshPriceData, shouldRefreshFinancialData, getUpdateSummary } from './cache-utils'
 
 const t = initTRPC.create()
 
@@ -40,7 +41,11 @@ export const appRouter = router({
       include: {
         stock: {
           include: {
-            financialData: true,
+            financialData: {
+              where: { period: 'annual' },
+              orderBy: { updatedAt: 'desc' },
+              take: 1
+            },
           },
         },
       },
@@ -235,7 +240,12 @@ export const appRouter = router({
     }),
 
   refreshAllWatchlistPrices: publicProcedure
-    .mutation(async () => {
+    .input(z.object({
+      forceRefresh: z.boolean().default(false)
+    }).optional().default({}))
+    .mutation(async ({ input = {} }) => {
+      const { forceRefresh = false } = input
+
       const watchlistStocks = await db.stock.findMany({
         where: {
           watchlistItems: {
@@ -245,13 +255,47 @@ export const appRouter = router({
               }
             }
           }
+        },
+        select: {
+          id: true,
+          ticker: true,
+          price: true,
+          marketCap: true,
+          updatedAt: true
         }
       })
 
-      console.log(`Found ${watchlistStocks.length} stocks to update:`, watchlistStocks.map((s: any) => s.ticker))
+      console.log(`Found ${watchlistStocks.length} stocks in watchlist`)
+
+      // Filter stocks that need price updates based on cache rules
+      const stocksNeedingUpdate = forceRefresh 
+        ? watchlistStocks 
+        : watchlistStocks.filter(stock => shouldRefreshPriceData(stock.updatedAt))
+
+      const summary = getUpdateSummary(watchlistStocks, 'price')
+      
+      console.log(`Price cache summary:`, {
+        total: summary.total,
+        needsUpdate: summary.needsUpdate,
+        fresh: summary.fresh,
+        forceRefresh,
+        stocksToUpdate: stocksNeedingUpdate.map(s => s.ticker)
+      })
+
+      if (stocksNeedingUpdate.length === 0 && !forceRefresh) {
+        console.log('All price data is fresh, skipping API calls')
+        return {
+          updated: [],
+          skipped: watchlistStocks.length,
+          totalStocks: watchlistStocks.length,
+          message: 'All price data is already fresh (updated within 2 hours)'
+        }
+      }
 
       const results = []
-      for (const stock of watchlistStocks) {
+      const skipped = []
+
+      for (const stock of stocksNeedingUpdate) {
         try {
           console.log(`Fetching quote for ${stock.ticker}...`)
           const quote = await fmpFinancialApi.getStockQuote(stock.ticker)
@@ -273,11 +317,28 @@ export const appRouter = router({
           console.error(`Error updating ${stock.ticker}:`, error)
         }
       }
-      return results
+
+      // Track skipped stocks for reporting
+      const updatedTickers = results.map(r => r.ticker)
+      skipped.push(...watchlistStocks.filter(s => !updatedTickers.includes(s.ticker)))
+
+      return {
+        updated: results,
+        skipped: skipped.length,
+        totalStocks: watchlistStocks.length,
+        message: forceRefresh 
+          ? `Force refreshed ${results.length} stocks`
+          : `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
+      }
     }),
 
   refreshAllFinancialData: publicProcedure
-    .mutation(async () => {
+    .input(z.object({
+      forceRefresh: z.boolean().default(false)
+    }).optional().default({}))
+    .mutation(async ({ input = {} }) => {
+      const { forceRefresh = false } = input
+
       const watchlistStocks = await db.stock.findMany({
         where: {
           watchlistItems: {
@@ -287,13 +348,50 @@ export const appRouter = router({
               }
             }
           }
+        },
+        include: {
+          financialData: {
+            where: { period: 'annual' },
+            orderBy: { updatedAt: 'desc' },
+            take: 1
+          }
         }
       })
 
-      console.log(`Found ${watchlistStocks.length} stocks to fetch financial data for:`, watchlistStocks.map((s: any) => s.ticker))
+      console.log(`Found ${watchlistStocks.length} stocks in watchlist`)
+
+      // Filter stocks that need financial data updates based on cache rules
+      const stocksNeedingUpdate = forceRefresh 
+        ? watchlistStocks 
+        : watchlistStocks.filter(stock => {
+            const latestFinancialData = stock.financialData[0]
+            return shouldRefreshFinancialData(latestFinancialData?.updatedAt)
+          })
+
+      const summary = getUpdateSummary(watchlistStocks, 'financial')
+      
+      console.log(`Financial data cache summary:`, {
+        total: summary.total,
+        needsUpdate: summary.needsUpdate,
+        fresh: summary.fresh,
+        forceRefresh,
+        stocksToUpdate: stocksNeedingUpdate.map(s => s.ticker)
+      })
+
+      if (stocksNeedingUpdate.length === 0 && !forceRefresh) {
+        console.log('All financial data is fresh, skipping API calls')
+        return {
+          updated: [],
+          skipped: watchlistStocks.length,
+          totalStocks: watchlistStocks.length,
+          message: 'All financial data is already fresh (updated within 12 hours)'
+        }
+      }
 
       const results = []
-      for (const stock of watchlistStocks) {
+      const skipped = []
+
+      for (const stock of stocksNeedingUpdate) {
         try {
           console.log(`Fetching financial data for ${stock.ticker}...`)
           const financialData = await fmpFinancialApi.getFinancialData(stock.ticker)
@@ -347,7 +445,19 @@ export const appRouter = router({
           console.error(`Error fetching financial data for ${stock.ticker}:`, error)
         }
       }
-      return results
+
+      // Track skipped stocks for reporting
+      const updatedTickers = results.map(r => r.stock)
+      skipped.push(...watchlistStocks.filter(s => !updatedTickers.includes(s.ticker)))
+
+      return {
+        updated: results,
+        skipped: skipped.length,
+        totalStocks: watchlistStocks.length,
+        message: forceRefresh 
+          ? `Force refreshed ${results.length} stocks`
+          : `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
+      }
     }),
 
   enrichAllStockData: publicProcedure

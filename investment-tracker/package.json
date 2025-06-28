@@ -15,7 +15,7 @@
     "lint:strict": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next out dist",
-    "get-secrets": "sops -d env.enc.yaml > .env",
+    "get-secrets": "sops -d env.enc.yaml | grep -E '^[A-Z_]+:' | sed 's/: /=/' > .env",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

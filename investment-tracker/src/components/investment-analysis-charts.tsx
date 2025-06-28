@@ -86,20 +86,15 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           shareDilution: latestFinancials?.shareDilution ?? undefined,
         }
 
-        // Debug logging for specific stocks
-        if (['ONON', 'TTD', 'APP', 'SNOW', 'PLTR'].includes(item.stock.ticker)) {
-          console.log(`🔍 Debug ${item.stock.ticker}:`, {
-            hasFinancialData: !!latestFinancials,
-            rawFinancials: latestFinancials,
-            processedMetrics: metrics
-          })
-        }
-
         const scores = scoringEngine.calculateOverallScore(metrics)
         
-        // Debug logging for scores
-        if (['ONON', 'TTD', 'APP', 'SNOW', 'PLTR'].includes(item.stock.ticker)) {
-          console.log(`📊 Scores for ${item.stock.ticker}:`, scores)
+        // Debug logging for stocks with missing scores
+        if (scores.overallScore === 0) {
+          console.log(`Zero score for ${item.stock.ticker}:`, {
+            metrics,
+            scores,
+            hasFinancialData: !!latestFinancials
+          })
         }
         
         return {
@@ -115,12 +110,6 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
           metrics
         }
       })
-
-    console.log('🎯 Analysis Data (top 10):', stocksWithScores.slice(0, 10).map(s => ({
-      ticker: s.ticker,
-      overallScore: s.overallScore,
-      hasFinancialData: s.hasFinancialData
-    })))
 
     setAnalysisData(stocksWithScores)
   }, [data])
@@ -142,12 +131,21 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
     .sort((a, b) => b.overallScore - a.overallScore)
     .slice(0, 10)
 
-  // Debug the top performers data
-  console.log('🏆 Top Performers for chart:', topPerformers.map(p => ({
-    ticker: p.ticker,
-    overallScore: p.overallScore,
-    hasFinancialData: p.hasFinancialData
-  })))
+  // Debug log the top performers data
+  console.log('Top performers data:', topPerformers)
+  console.log('Analysis data length:', analysisData.length)
+  console.log('Sample stock data:', analysisData[0])
+  
+  // If all scores are 0, create some mock data for demonstration
+  const hasRealScores = topPerformers.some(stock => stock.overallScore > 0)
+  console.log('Has real scores:', hasRealScores)
+  
+  // Always use the user's real data from their watchlist/portfolio
+  // If no scores are calculated yet, show a message to refresh financial data
+  const chartData = topPerformers.slice(0, 8)
+  
+  console.log('Chart data:', chartData)
+
 
   // Sector analysis
   const sectorAnalysis = analysisData.reduce((acc, stock) => {
@@ -351,24 +349,70 @@ export function InvestmentAnalysisCharts({ data }: InvestmentAnalysisChartsProps
             </CardDescription>
           </CardHeader>
           <CardContent className="relative">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topPerformers} layout="horizontal">
+            {!hasRealScores && chartData.length > 0 && (
+              <div className="mb-4 p-3 bg-amber-500/10 border border-amber-400/30 rounded-lg">
+                <p className="text-amber-200 text-sm">
+                  ⚠️ Your stocks show 0% scores because financial data is missing. Use "Refresh Financial Data" button to fetch the data needed for scoring.
+                </p>
+              </div>
+            )}
+            
+            {chartData.length === 0 ? (
+              <div className="flex items-center justify-center h-[300px] text-white/60">
+                <div className="text-center">
+                  <p className="text-lg">No stocks in your watchlist or portfolio yet</p>
+                  <p className="text-sm mt-2">Add stocks to see investment analysis</p>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+              <BarChart 
+                data={chartData} 
+                layout="horizontal" 
+                margin={{ top: 20, right: 30, left: 70, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="blueGradient" x1="0" y1="0" x2="1" y2="0">
+                  <linearGradient id="topScoresGradient" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stopColor="#3B82F6" />
                     <stop offset="100%" stopColor="#6366F1" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                <XAxis type="number" domain={[0, 1]} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
-                <YAxis dataKey="ticker" type="category" width={60} tick={{ fill: '#ffffff80' }} axisLine={{ stroke: '#ffffff30' }} />
-                <Tooltip 
-                  formatter={(value: number) => [(value * 100).toFixed(1) + '%', 'Score']}
-                  contentStyle={{ backgroundColor: '#00000090', border: '1px solid #ffffff20', borderRadius: '8px', color: '#ffffff' }}
+                <XAxis 
+                  type="number" 
+                  domain={[0, 1]} 
+                  tick={{ fill: '#ffffff80', fontSize: 12 }} 
+                  axisLine={{ stroke: '#ffffff30' }}
+                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
                 />
-                <Bar dataKey="overallScore" fill="url(#blueGradient)" />
+                <YAxis 
+                  dataKey="ticker" 
+                  type="category" 
+                  width={60} 
+                  tick={{ fill: '#ffffff80', fontSize: 12 }} 
+                  axisLine={{ stroke: '#ffffff30' }} 
+                />
+                <Tooltip 
+                  formatter={(value: number) => [(value * 100).toFixed(1) + '%', 'Investment Score']}
+                  labelFormatter={(label) => `${label}`}
+                  contentStyle={{ 
+                    backgroundColor: '#000000cc', 
+                    border: '1px solid #ffffff30', 
+                    borderRadius: '8px', 
+                    color: '#ffffff',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                />
+                <Bar 
+                  dataKey="overallScore" 
+                  fill="url(#topScoresGradient)" 
+                  stroke="#6366F1"
+                  strokeWidth={1}
+                  radius={[0, 4, 4, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 

@@ -1,21 +1,27 @@
 
 import { useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Zap } from 'lucide-react'
 import { trpc } from '@/lib/trpc-client-new'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 
 export function RefreshPricesButton() {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [forceRefresh, setForceRefresh] = useState(false)
   const { toast } = useToast()
   const utils = trpc.useUtils()
 
   const refreshAllPrices = trpc.refreshAllWatchlistPrices.useMutation({
-    onSuccess: (results) => {
+    onSuccess: (result) => {
+      const { updated, skipped, message } = result
+      
+      utils.getWatchlist.invalidate()
+      utils.getStocks.invalidate()
+      
       toast({
-        title: "Prices Updated",
-        description: `Successfully refreshed prices for ${results.length} stocks`,
-        duration: 3000,
+        title: "Price Refresh Complete",
+        description: message || `Updated ${updated.length} stocks, ${skipped} were already fresh`,
+        duration: 4000,
       })
     },
     onError: () => {
@@ -29,21 +35,23 @@ export function RefreshPricesButton() {
   })
 
   const refreshFinancialData = trpc.refreshAllFinancialData.useMutation({
-    onSuccess: (results) => {
+    onSuccess: (result) => {
+      const { updated, skipped, message } = result
+      
       utils.getWatchlist.invalidate()
       utils.getStocks.invalidate()
       setIsRefreshing(false)
       
       toast({
-        title: "All Data Updated",
-        description: `Successfully refreshed prices and financial data for ${results.length} stocks`,
-        duration: 3000,
+        title: "Financial Data Refresh Complete",
+        description: message || `Updated ${updated.length} stocks, ${skipped} were already fresh`,
+        duration: 4000,
       })
     },
     onError: () => {
       setIsRefreshing(false)
       toast({
-        title: "Refresh Failed",
+        title: "Financial Data Refresh Failed",
         description: "Unable to refresh financial data. Check your API keys.",
         variant: "destructive",
         duration: 5000,
@@ -51,27 +59,46 @@ export function RefreshPricesButton() {
     },
   })
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (force = false) => {
     setIsRefreshing(true)
+    setForceRefresh(force)
+    
     try {
-      // First refresh prices (fast)
-      await refreshAllPrices.mutateAsync()
-      // Then refresh financial data (slower)
-      await refreshFinancialData.mutateAsync()
+      // First refresh prices (fast) with cache logic
+      await refreshAllPrices.mutateAsync({ forceRefresh: force })
+      // Then refresh financial data (slower) with cache logic
+      await refreshFinancialData.mutateAsync({ forceRefresh: force })
     } catch (error) {
       setIsRefreshing(false)
     }
   }
 
+  const handleSmartRefresh = () => handleRefresh(false)
+  const handleForceRefresh = () => handleRefresh(true)
+
   return (
-    <Button 
-      variant="outline" 
-      onClick={handleRefresh}
-      disabled={isRefreshing}
-      className="flex items-center gap-2"
-    >
-      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-      {isRefreshing ? 'Refreshing All Data...' : 'Refresh All Data'}
-    </Button>
+    <div className="flex gap-2">
+      <Button 
+        variant="outline" 
+        onClick={handleSmartRefresh}
+        disabled={isRefreshing}
+        className="flex items-center gap-2"
+      >
+        <RefreshCw className={`h-4 w-4 ${isRefreshing && !forceRefresh ? 'animate-spin' : ''}`} />
+        {isRefreshing && !forceRefresh ? 'Smart Refreshing...' : 'Smart Refresh'}
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleForceRefresh}
+        disabled={isRefreshing}
+        className="flex items-center gap-1 px-3"
+        title="Force refresh all data regardless of cache"
+      >
+        <Zap className={`h-3 w-3 ${isRefreshing && forceRefresh ? 'animate-spin' : ''}`} />
+        {isRefreshing && forceRefresh ? 'Forcing...' : 'Force'}
+      </Button>
+    </div>
   )
 }
