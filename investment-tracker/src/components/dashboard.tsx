@@ -10,9 +10,7 @@ import { AddStockDialog } from './add-stock-dialog'
 import { PortfolioCharts } from './portfolio-charts'
 import { WatchlistAnalysis } from './watchlist-analysis'
 import { InvestmentAnalysisCharts } from './investment-analysis-charts'
-import { RefreshPricesButton } from './refresh-prices-button'
-import { RefreshFinancialDataButton } from './refresh-financial-data-button'
-import { EnrichStockDataButton } from './enrich-stock-data-button'
+import { RefreshAllDataButton } from './refresh-prices-button'
 import { exportService } from '@/lib/export'
 import {
   DropdownMenu,
@@ -87,9 +85,7 @@ export function Dashboard() {
                 <p className="text-slate-300 mt-3 text-xl font-light">Elite Investment Intelligence Platform</p>
               </div>
               <div className="flex gap-4">
-                <RefreshPricesButton />
-                <RefreshFinancialDataButton />
-                <EnrichStockDataButton />
+                <RefreshAllDataButton />
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -280,10 +276,7 @@ export function Dashboard() {
                       >
                         Add New Stock
                       </Button>
-                      <div className="flex gap-2">
-                        <RefreshPricesButton />
-                        <RefreshFinancialDataButton />
-                      </div>
+                      <RefreshAllDataButton />
                     </div>
                   </div>
                 </div>
