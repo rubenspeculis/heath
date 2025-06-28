@@ -240,11 +240,7 @@ export const appRouter = router({
     }),
 
   refreshAllWatchlistPrices: publicProcedure
-    .input(z.object({
-      forceRefresh: z.boolean().default(false)
-    }).optional().default({}))
-    .mutation(async ({ input = {} }) => {
-      const { forceRefresh = false } = input
+    .mutation(async () => {
 
       const watchlistStocks = await db.stock.findMany({
         where: {
@@ -268,9 +264,7 @@ export const appRouter = router({
       console.log(`Found ${watchlistStocks.length} stocks in watchlist`)
 
       // Filter stocks that need price updates based on cache rules
-      const stocksNeedingUpdate = forceRefresh 
-        ? watchlistStocks 
-        : watchlistStocks.filter(stock => shouldRefreshPriceData(stock.updatedAt))
+      const stocksNeedingUpdate = watchlistStocks.filter(stock => shouldRefreshPriceData(stock.updatedAt))
 
       const summary = getUpdateSummary(watchlistStocks, 'price')
       
@@ -278,11 +272,10 @@ export const appRouter = router({
         total: summary.total,
         needsUpdate: summary.needsUpdate,
         fresh: summary.fresh,
-        forceRefresh,
         stocksToUpdate: stocksNeedingUpdate.map(s => s.ticker)
       })
 
-      if (stocksNeedingUpdate.length === 0 && !forceRefresh) {
+      if (stocksNeedingUpdate.length === 0) {
         console.log('All price data is fresh, skipping API calls')
         return {
           updated: [],
@@ -326,18 +319,12 @@ export const appRouter = router({
         updated: results,
         skipped: skipped.length,
         totalStocks: watchlistStocks.length,
-        message: forceRefresh 
-          ? `Force refreshed ${results.length} stocks`
-          : `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
+        message: `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
       }
     }),
 
   refreshAllFinancialData: publicProcedure
-    .input(z.object({
-      forceRefresh: z.boolean().default(false)
-    }).optional().default({}))
-    .mutation(async ({ input = {} }) => {
-      const { forceRefresh = false } = input
+    .mutation(async () => {
 
       const watchlistStocks = await db.stock.findMany({
         where: {
@@ -361,12 +348,10 @@ export const appRouter = router({
       console.log(`Found ${watchlistStocks.length} stocks in watchlist`)
 
       // Filter stocks that need financial data updates based on cache rules
-      const stocksNeedingUpdate = forceRefresh 
-        ? watchlistStocks 
-        : watchlistStocks.filter(stock => {
-            const latestFinancialData = stock.financialData[0]
-            return shouldRefreshFinancialData(latestFinancialData?.updatedAt)
-          })
+      const stocksNeedingUpdate = watchlistStocks.filter(stock => {
+        const latestFinancialData = stock.financialData[0]
+        return shouldRefreshFinancialData(latestFinancialData?.updatedAt)
+      })
 
       const summary = getUpdateSummary(watchlistStocks, 'financial')
       
@@ -374,11 +359,10 @@ export const appRouter = router({
         total: summary.total,
         needsUpdate: summary.needsUpdate,
         fresh: summary.fresh,
-        forceRefresh,
         stocksToUpdate: stocksNeedingUpdate.map(s => s.ticker)
       })
 
-      if (stocksNeedingUpdate.length === 0 && !forceRefresh) {
+      if (stocksNeedingUpdate.length === 0) {
         console.log('All financial data is fresh, skipping API calls')
         return {
           updated: [],
@@ -454,9 +438,7 @@ export const appRouter = router({
         updated: results,
         skipped: skipped.length,
         totalStocks: watchlistStocks.length,
-        message: forceRefresh 
-          ? `Force refreshed ${results.length} stocks`
-          : `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
+        message: `Smart refresh: Updated ${results.length} stale stocks, ${skipped.length} were already fresh`
       }
     }),
 

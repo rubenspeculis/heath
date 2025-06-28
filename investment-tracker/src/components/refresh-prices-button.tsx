@@ -1,13 +1,12 @@
 
 import { useState } from 'react'
-import { RefreshCw, Zap } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { trpc } from '@/lib/trpc-client-new'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 
 export function RefreshPricesButton() {
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [forceRefresh, setForceRefresh] = useState(false)
   const { toast } = useToast()
   const utils = trpc.useUtils()
 
@@ -59,46 +58,28 @@ export function RefreshPricesButton() {
     },
   })
 
-  const handleRefresh = async (force = false) => {
+  const handleRefresh = async () => {
     setIsRefreshing(true)
-    setForceRefresh(force)
     
     try {
-      // First refresh prices (fast) with cache logic
-      await refreshAllPrices.mutateAsync({ forceRefresh: force })
-      // Then refresh financial data (slower) with cache logic
-      await refreshFinancialData.mutateAsync({ forceRefresh: force })
+      // First refresh prices (fast) with smart cache logic
+      await refreshAllPrices.mutateAsync()
+      // Then refresh financial data (slower) with smart cache logic
+      await refreshFinancialData.mutateAsync()
     } catch (error) {
       setIsRefreshing(false)
     }
   }
 
-  const handleSmartRefresh = () => handleRefresh(false)
-  const handleForceRefresh = () => handleRefresh(true)
-
   return (
-    <div className="flex gap-2">
-      <Button 
-        variant="outline" 
-        onClick={handleSmartRefresh}
-        disabled={isRefreshing}
-        className="flex items-center gap-2"
-      >
-        <RefreshCw className={`h-4 w-4 ${isRefreshing && !forceRefresh ? 'animate-spin' : ''}`} />
-        {isRefreshing && !forceRefresh ? 'Smart Refreshing...' : 'Smart Refresh'}
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={handleForceRefresh}
-        disabled={isRefreshing}
-        className="flex items-center gap-1 px-3"
-        title="Force refresh all data regardless of cache"
-      >
-        <Zap className={`h-3 w-3 ${isRefreshing && forceRefresh ? 'animate-spin' : ''}`} />
-        {isRefreshing && forceRefresh ? 'Forcing...' : 'Force'}
-      </Button>
-    </div>
+    <Button 
+      variant="outline" 
+      onClick={handleRefresh}
+      disabled={isRefreshing}
+      className="flex items-center gap-2"
+    >
+      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+      {isRefreshing ? 'Refreshing...' : 'Refresh All Data'}
+    </Button>
   )
 }
